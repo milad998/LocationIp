@@ -1,5 +1,5 @@
 // pages/add-location.js 'use client'; import { useState } from 'react';
-
+"use client"
 export default function AddLocation() {
   const [ip, setIp] = useState('');
   const [name, setName] = useState(''); 
