@@ -6,7 +6,7 @@ const locationRoutes = require('./router/Location');
 const createTables = require('./model/Initdb');
 
 app.use(express.json());
-app.use('/', locationRoutes);
+app.use('/api', locationRoutes);
 
 // استدعاء إنشاء الجداول عند بدء التشغيل
 createTables();
