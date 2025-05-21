@@ -1,4 +1,4 @@
-const model = require('../models/locationModel');
+const model = require('../model/locationModel');
 
 // الوظيفة 1: إضافة IP واسم إلى جدول محدد
 const addLocation = async (req, res) => {
