@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const controller = require('../controllers/locationController');
+const controller = require('../controller/locationController');
 
 // إضافة IP واسم لجدول معين
 router.post('/locations/:table', controller.addLocation);
