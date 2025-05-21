@@ -1,4 +1,4 @@
-const pool = require('../DBb/db');
+const pool = require('../DB/db');
 
 const getAllFromTable = async (table) => {
   const res = await pool.query(`SELECT * FROM ${table}`);
