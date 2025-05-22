@@ -1,6 +1,8 @@
 const express = require('express');
 const app = express();
 require('dotenv').config();
+const cors = require('cors');
+app.use(cors());
 
 const locationRoutes = require('./router/Location');
 const createTables = require('./model/Initdb');
