@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { Server, Type, Globe, CheckCircle, AlertCircle } from 'lucide-react';
-
+import '../globals.css';
 export default function AddLocation() {
   const [ip, setIp] = useState('');
   const [name, setName] = useState('');
