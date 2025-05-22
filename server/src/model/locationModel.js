@@ -41,10 +41,20 @@ const getAllIPsAndNames = async () => {
 };
 
 
+const deleteDeviceByName = async (name) => {
+  const tables = ['al_tabaqa', 'al_raqqa', 'kobani'];
+  for (const table of tables) {
+    await pool.query(`DELETE FROM ${table} WHERE name = $1`, [name]);
+  }
+};
+
+
+
 
 module.exports = {
   getAllFromTable,
   insertIntoTable,
   findNamesByIps,
-  getAllIPsAndNames
+  getAllIPsAndNames,
+  deleteDeviceByName
 };
