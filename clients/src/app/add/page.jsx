@@ -20,6 +20,7 @@ export default function AddLocation() {
       const data = await res.json();
       setResponse(data);
       setStatus(res.ok ? 'success' : 'error');
+      setName('');
     } catch (err) {
       setResponse({ error: 'حدث خطأ أثناء الاتصال بالسيرفر' });
       setStatus('error');
