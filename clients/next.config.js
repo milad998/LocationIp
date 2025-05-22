@@ -1,5 +1,12 @@
-module.exports = {
+// next.config.js
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   experimental: {
-    optimizeCss: false, // إيقاف استخدام lightningcss
+    optimizeCss: false, // تعطيل lightningcss
   },
+  compiler: {
+    legacyDecorators: true,
+  }
 }
+
+module.exports = nextConfig
