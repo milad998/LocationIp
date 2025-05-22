@@ -168,15 +168,15 @@ export default function SearchIps() {
           <div className="mb-3 position-relative" ref={containerRef}>
             <label className="form-label">أدخل عناوين IP مفصولة بمسافات أو كلمات</label>
             <div className="position-relative">
-              <textarea
+              <input
                 className="form-control"
+                type="text"
                 placeholder="اكتب جزء من الاسم أو IP وسيظهر اقتراح"
-                rows={4}
                 value={ips}
                 onChange={handleInputChange}
                 onKeyDown={handleKeyDown}
                 ref={textareaRef}
-              ></textarea>
+              ></input>
               {ips && (
                 <X
                   size={18}
@@ -238,7 +238,7 @@ export default function SearchIps() {
                     <span className="fw-bold">{CITY_MAP[line.replace(':', '').trim()] || line}</span>
                   ) : (
                     <>
-                      <span className="text-danger me-2">●</span>
+                      <span className="text-danger me-2">🔴</span>
                       <span>{line}</span>
                     </>
                   )}
