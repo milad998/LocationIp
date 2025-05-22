@@ -132,9 +132,9 @@ export default function SearchIps() {
       if (line.trim().endsWith(':')) {
         const key = line.replace(':', '').trim();
         const arabicName = CITY_MAP[key] || key;
-        whatsappText += `\n*${arabicName}*:\n`;
+        whatsappText += `*${arabicName}*:`;
       } else if (line.trim()) {
-        whatsappText += `- ${line.trim()}\n`;
+        whatsappText += `\n🔴${line.trim()}\n`;
       }
     }
     return whatsappText.trim();
