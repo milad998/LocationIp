@@ -1,6 +1,12 @@
-"use client"
+'use client';
 import { useEffect, useRef, useState } from 'react';
-import { Search, Loader2, CheckCircle, AlertCircle, X, Copy, Check } from 'lucide-react';
+import { Search, Loader2, CheckCircle, AlertCircle, X, Clipboard } from 'lucide-react';
+
+const CITY_MAP = {
+  al_raqqa: 'الرقة',
+  al_tabaqa: 'الطبقة',
+  kobani: 'كوباني',
+};
 
 export default function SearchIps() {
   const [ips, setIps] = useState('');
@@ -10,8 +16,8 @@ export default function SearchIps() {
   const [suggestions, setSuggestions] = useState([]);
   const [allData, setAllData] = useState([]);
   const [highlightIndex, setHighlightIndex] = useState(-1);
-  const [copied, setCopied] = useState(false);
   const containerRef = useRef();
+  const textareaRef = useRef();
 
   useEffect(() => {
     const fetchAll = async () => {
@@ -62,9 +68,14 @@ export default function SearchIps() {
     const tokens = ips.trim().split(/\s+/);
     tokens.pop();
     tokens.push(entry.ip);
-    setIps(tokens.join(' ') + ' ');
-    updateSuggestions(tokens.join(' ') + ' ');
-    // لا نقوم بإخفاء الاقتراحات هنا
+    const newIps = tokens.join(' ') + ' ';
+    setIps(newIps);
+    updateSuggestions(newIps);
+    setSuggestions([]);
+    setHighlightIndex(-1);
+    setTimeout(() => {
+      if (textareaRef.current) textareaRef.current.focus();
+    }, 0);
   };
 
   const handleKeyDown = (e) => {
@@ -90,12 +101,6 @@ export default function SearchIps() {
     setStatus(null);
   };
 
-  const handleCopy = async () => {
-    await navigator.clipboard.writeText(result);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
   const handleSearch = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -117,6 +122,30 @@ export default function SearchIps() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const formatResultForWhatsapp = () => {
+    if (!result) return '';
+    const lines = result.split('\n');
+    let whatsappText = '';
+    for (const line of lines) {
+      if (line.trim().endsWith(':')) {
+        const key = line.replace(':', '').trim();
+        const arabicName = CITY_MAP[key] || key;
+        whatsappText += `\n*${arabicName}*:\n`;
+      } else if (line.trim()) {
+        whatsappText += `- ${line.trim()}\n`;
+      }
+    }
+    return whatsappText.trim();
+  };
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(result);
+  };
+
+  const handleCopyWhatsapp = () => {
+    navigator.clipboard.writeText(formatResultForWhatsapp());
   };
 
   return (
@@ -146,6 +175,7 @@ export default function SearchIps() {
                 value={ips}
                 onChange={handleInputChange}
                 onKeyDown={handleKeyDown}
+                ref={textareaRef}
               ></textarea>
               {ips && (
                 <X
@@ -192,16 +222,26 @@ export default function SearchIps() {
           <div className="mt-4">
             <div className="d-flex justify-content-between align-items-center mb-2">
               <h2 className="h6 mb-0">النتائج:</h2>
-              <button className="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1" onClick={handleCopy}>
-                {copied ? <Check size={16} /> : <Copy size={16} />}
-                {copied ? 'تم النسخ' : 'نسخ'}
-              </button>
+              <div className="d-flex gap-2">
+                <button onClick={handleCopy} className="btn btn-light btn-sm d-flex align-items-center gap-1">
+                  <Clipboard size={16} /> نسخ
+                </button>
+                <button onClick={handleCopyWhatsapp} className="btn btn-success btn-sm d-flex align-items-center gap-1">
+                  <Clipboard size={16} /> نسخ للواتساب
+                </button>
+              </div>
             </div>
             <div className="bg-light border rounded p-3 text-muted small overflow-auto">
               {result.split('\n').map((line, idx) => (
-                <div key={idx} className="d-flex align-items-center">
-                  <span className="me-2">🔴</span>
-                  <span>{line}</span>
+                <div key={idx} className="d-flex align-items-start">
+                  {line.endsWith(':') ? (
+                    <span className="fw-bold">{CITY_MAP[line.replace(':', '').trim()] || line}</span>
+                  ) : (
+                    <>
+                      <span className="text-danger me-2">●</span>
+                      <span>{line}</span>
+                    </>
+                  )}
                 </div>
               ))}
             </div>
@@ -210,4 +250,4 @@ export default function SearchIps() {
       </div>
     </div>
   );
-    }
+      }
