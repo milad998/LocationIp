@@ -76,9 +76,26 @@ const fetchDevices = async (req, res) => {
 };
 
 
+const deleteDevice = async (req, res) => {
+  try {
+    const { name } = req.params;
+    if (!name) {
+      return res.status(400).json({ message: 'الاسم مطلوب' });
+    }
+
+    await model.deleteDeviceByName(name);
+    res.json({ message: `تم حذف الجهاز بالاسم: ${name}` });
+  } catch (err) {
+    console.error('Error deleting device:', err);
+    res.status(500).json({ message: 'خطأ في الخادم' });
+  }
+};
+
+
 
 module.exports = {
   addLocation,
   findIpsInTables,
-  fetchDevices
+  fetchDevices,
+  deleteDevice
 };
