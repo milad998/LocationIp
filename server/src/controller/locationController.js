@@ -42,20 +42,19 @@ const findIpsInTables = async (req, res) => {
 const getAllIPsAndNames = async () => {
   try {
     const tables = ['al_tabaqa', 'al_raqqa', 'kobani'];
-    const results = [];
 
-    for (const table of tables) {
-      const queryResult = await pool.query(`SELECT ip, name FROM ${table}`);
-      queryResult.rows.forEach(row => {
-        results.push({
-          table: table,
+    const queries = tables.map(table =>
+      pool.query(`SELECT ip, name FROM ${table}`).then(res =>
+        res.rows.map(row => ({
+          table,
           ip: row.ip,
           name: row.name
-        });
-      });
-    }
+        }))
+      )
+    );
 
-    return results;
+    const results = await Promise.all(queries);
+    return results.flat();
   } catch (err) {
     console.error('Error fetching data:', err);
     return [];
