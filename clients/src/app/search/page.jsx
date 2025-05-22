@@ -1,12 +1,98 @@
 'use client';
-import { useState } from 'react';
-import { Search, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { Search, Loader2, CheckCircle, AlertCircle, X } from 'lucide-react';
 
 export default function SearchIps() {
   const [ips, setIps] = useState('');
   const [result, setResult] = useState('');
   const [status, setStatus] = useState(null); // success | error | null
   const [loading, setLoading] = useState(false);
+  const [suggestions, setSuggestions] = useState([]);
+  const [allData, setAllData] = useState([]);
+  const [highlightIndex, setHighlightIndex] = useState(-1);
+  const containerRef = useRef();
+
+  // جلب البيانات من السيرفر
+  useEffect(() => {
+    const fetchAll = async () => {
+      try {
+        const res = await fetch('http://localhost:8000/api/all');
+        const data = await res.json();
+        setAllData(data);
+      } catch (err) {
+        console.error('فشل في جلب البيانات:', err);
+      }
+    };
+    fetchAll();
+  }, []);
+
+  // إغلاق الاقتراحات عند الضغط خارج المربع
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (containerRef.current && !containerRef.current.contains(e.target)) {
+        setSuggestions([]);
+        setHighlightIndex(-1);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleInputChange = (e) => {
+    const value = e.target.value;
+    setIps(value);
+    updateSuggestions(value);
+  };
+
+  const updateSuggestions = (value) => {
+    const lastWord = value.trim().split(/\s+/).pop()?.toLowerCase();
+    if (!lastWord) {
+      setSuggestions([]);
+      return;
+    }
+
+    const matches = allData.filter(
+      (entry) =>
+        entry.name?.toLowerCase().includes(lastWord) ||
+        entry.ip?.startsWith(lastWord)
+    );
+
+    setSuggestions(matches.slice(0, 10));
+    setHighlightIndex(-1);
+  };
+
+  const handleSuggestionClick = (entry) => {
+    const tokens = ips.trim().split(/\s+/);
+    tokens.pop();
+    tokens.push(entry.ip);
+    setIps(tokens.join(' ') + ' ');
+    setSuggestions([]);
+    setHighlightIndex(-1);
+  };
+
+  const handleKeyDown = (e) => {
+    if (suggestions.length === 0) return;
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setHighlightIndex((prev) => (prev + 1) % suggestions.length);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setHighlightIndex((prev) =>
+        prev <= 0 ? suggestions.length - 1 : prev - 1
+      );
+    } else if (e.key === 'Enter' && highlightIndex >= 0) {
+      e.preventDefault();
+      handleSuggestionClick(suggestions[highlightIndex]);
+    }
+  };
+
+  const handleClear = () => {
+    setIps('');
+    setSuggestions([]);
+    setResult('');
+    setStatus(null);
+  };
 
   const handleSearch = async (e) => {
     e.preventDefault();
@@ -15,11 +101,11 @@ export default function SearchIps() {
     setResult('');
 
     try {
-      const ipList = ips.split(' ').map(ip => ip.trim());
+      const ipList = ips.trim().split(/\s+/);
       const res = await fetch('http://localhost:8000/api/locations/search/ips', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ips: ipList })
+        body: JSON.stringify({ ips: ipList }),
       });
 
       const text = await res.text();
@@ -50,15 +136,44 @@ export default function SearchIps() {
         )}
 
         <form onSubmit={handleSearch}>
-          <div className="mb-3">
-            <label className="form-label">أدخل عناوين IP مفصولة بفاصلة</label>
-            <textarea
-              className="form-control"
-              placeholder="مثال: 192.168.1.1, 10.0.0.1"
-              rows={5}
-              value={ips}
-              onChange={e => setIps(e.target.value)}
-            ></textarea>
+          <div className="mb-3 position-relative" ref={containerRef}>
+            <label className="form-label">أدخل عناوين IP مفصولة بمسافات أو كلمات</label>
+            <div className="position-relative">
+              <textarea
+                className="form-control"
+                placeholder="اكتب جزء من الاسم أو IP وسيظهر اقتراح"
+                rows={4}
+                value={ips}
+                onChange={handleInputChange}
+                onKeyDown={handleKeyDown}
+              ></textarea>
+              {ips && (
+                <X
+                  size={18}
+                  className="position-absolute top-0 end-0 mt-2 me-2 text-danger"
+                  style={{ cursor: 'pointer' }}
+                  onClick={handleClear}
+                />
+              )}
+            </div>
+
+            {suggestions.length > 0 && (
+              <ul className="list-group position-absolute w-100 z-3" style={{ top: '100%', left: 0 }}>
+                {suggestions.map((entry, idx) => (
+                  <li
+                    key={idx}
+                    className={`list-group-item list-group-item-action d-flex justify-content-between ${
+                      idx === highlightIndex ? 'active' : ''
+                    }`}
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => handleSuggestionClick(entry)}
+                  >
+                    <span>{entry.name}</span>
+                    <span className="text-muted small">{entry.ip}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
 
           <button
@@ -78,15 +193,9 @@ export default function SearchIps() {
             <h2 className="h6 mb-2">النتائج:</h2>
             <div className="bg-light border rounded p-3 text-muted small overflow-auto">
               {result.split('\n').map((line, idx) => (
-                <div key={idx}>
-                  {line.trim().startsWith('.') ? (
-                    <>
-                      <span className="text-danger me-2">●</span>
-                      {line.slice(1)}
-                    </>
-                  ) : (
-                    line
-                  )}
+                <div key={idx} className="d-flex align-items-center">
+                  <span className="text-danger me-2">●</span>
+                  <span>{line}</span>
                 </div>
               ))}
             </div>
@@ -95,4 +204,4 @@ export default function SearchIps() {
       </div>
     </div>
   );
-                }
+}
