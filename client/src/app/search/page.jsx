@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { Search, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
-import './globals.css';
+import '../globals.css';
 export default function SearchIps() {
   const [ips, setIps] = useState('');
   const [result, setResult] = useState('');
