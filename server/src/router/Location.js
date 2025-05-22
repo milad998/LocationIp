@@ -7,5 +7,5 @@ const controller = require('../controller/locationController');
 router.post('/locations/:table', controller.addLocation);
 
 router.post('/locations/search/ips', controller.findIpsInTables);
-router.get("/all",controller.getAllIPsAndNames);
+router.get("/all",controller.fetchDevices);
 module.exports = router;
