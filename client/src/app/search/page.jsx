@@ -15,7 +15,7 @@ export default function SearchIps() {
     setResult('');
 
     try {
-      const ipList = ips.split(',').map(ip => ip.trim());
+      const ipList = ips.split(' ').map(ip => ip.trim());
       const res = await fetch('http://localhost:8000/api/locations/search/ips', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
