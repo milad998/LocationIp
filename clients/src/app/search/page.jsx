@@ -1,18 +1,18 @@
-'use client';
+"use client"
 import { useEffect, useRef, useState } from 'react';
-import { Search, Loader2, CheckCircle, AlertCircle, X } from 'lucide-react';
+import { Search, Loader2, CheckCircle, AlertCircle, X, Copy, Check } from 'lucide-react';
 
 export default function SearchIps() {
   const [ips, setIps] = useState('');
   const [result, setResult] = useState('');
-  const [status, setStatus] = useState(null); // success | error | null
+  const [status, setStatus] = useState(null);
   const [loading, setLoading] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
   const [allData, setAllData] = useState([]);
   const [highlightIndex, setHighlightIndex] = useState(-1);
+  const [copied, setCopied] = useState(false);
   const containerRef = useRef();
 
-  // جلب البيانات من السيرفر
   useEffect(() => {
     const fetchAll = async () => {
       try {
@@ -26,7 +26,6 @@ export default function SearchIps() {
     fetchAll();
   }, []);
 
-  // إغلاق الاقتراحات عند الضغط خارج المربع
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (containerRef.current && !containerRef.current.contains(e.target)) {
@@ -50,13 +49,11 @@ export default function SearchIps() {
       setSuggestions([]);
       return;
     }
-
     const matches = allData.filter(
       (entry) =>
         entry.name?.toLowerCase().includes(lastWord) ||
         entry.ip?.startsWith(lastWord)
     );
-
     setSuggestions(matches.slice(0, 10));
     setHighlightIndex(-1);
   };
@@ -66,13 +63,12 @@ export default function SearchIps() {
     tokens.pop();
     tokens.push(entry.ip);
     setIps(tokens.join(' ') + ' ');
-    setSuggestions([]);
-    setHighlightIndex(-1);
+    updateSuggestions(tokens.join(' ') + ' ');
+    // لا نقوم بإخفاء الاقتراحات هنا
   };
 
   const handleKeyDown = (e) => {
     if (suggestions.length === 0) return;
-
     if (e.key === 'ArrowDown') {
       e.preventDefault();
       setHighlightIndex((prev) => (prev + 1) % suggestions.length);
@@ -94,12 +90,17 @@ export default function SearchIps() {
     setStatus(null);
   };
 
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(result);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   const handleSearch = async (e) => {
     e.preventDefault();
     setLoading(true);
     setStatus(null);
     setResult('');
-
     try {
       const ipList = ips.trim().split(/\s+/);
       const res = await fetch('http://localhost:8000/api/locations/search/ips', {
@@ -107,7 +108,6 @@ export default function SearchIps() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ips: ipList }),
       });
-
       const text = await res.text();
       setResult(text);
       setStatus(res.ok ? 'success' : 'error');
@@ -190,11 +190,17 @@ export default function SearchIps() {
 
         {result && (
           <div className="mt-4">
-            <h2 className="h6 mb-2">النتائج:</h2>
+            <div className="d-flex justify-content-between align-items-center mb-2">
+              <h2 className="h6 mb-0">النتائج:</h2>
+              <button className="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1" onClick={handleCopy}>
+                {copied ? <Check size={16} /> : <Copy size={16} />}
+                {copied ? 'تم النسخ' : 'نسخ'}
+              </button>
+            </div>
             <div className="bg-light border rounded p-3 text-muted small overflow-auto">
               {result.split('\n').map((line, idx) => (
                 <div key={idx} className="d-flex align-items-center">
-                  <span className="text-danger me-2">●</span>
+                  <span className="me-2">🔴</span>
                   <span>{line}</span>
                 </div>
               ))}
@@ -204,4 +210,4 @@ export default function SearchIps() {
       </div>
     </div>
   );
-}
+    }
