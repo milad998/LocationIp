@@ -8,6 +8,8 @@ const CITY_MAP = {
   kobani: 'كوباني',
 };
 
+const ORDERED_KEYS = ['al_raqqa', 'al_tabaqa', 'kobani'];
+
 export default function SearchIps() {
   const [ips, setIps] = useState('');
   const [result, setResult] = useState('');
@@ -114,33 +116,7 @@ export default function SearchIps() {
         body: JSON.stringify({ ips: ipList }),
       });
       const text = await res.text();
-
-      // ترتيب النتائج حسب المدن
-      const cityOrder = ['al_raqqa', 'al_tabaqa', 'kobani'];
-      const groupedLines = {};
-      const lines = text.split('\n');
-      let currentCity = '';
-      for (const line of lines) {
-        if (line.trim().endsWith(':')) {
-          currentCity = line.replace(':', '').trim();
-          groupedLines[currentCity] = [];
-        } else if (line.trim()) {
-          if (currentCity) {
-            groupedLines[currentCity].push(line.trim());
-          }
-        }
-      }
-
-      let sortedText = '';
-      for (const cityKey of cityOrder) {
-        if (groupedLines[cityKey]) {
-          const arabicName = CITY_MAP[cityKey] || cityKey;
-          sortedText += `${arabicName}:\n`;
-          sortedText += groupedLines[cityKey].map((l) => `🔴${l}`).join('\n') + '\n';
-        }
-      }
-
-      setResult(sortedText.trim());
+      setResult(text);
       setStatus(res.ok ? 'success' : 'error');
     } catch (err) {
       setResult('حدث خطأ في الاتصال بالسيرفر.');
@@ -152,17 +128,30 @@ export default function SearchIps() {
 
   const formatResultForWhatsapp = () => {
     if (!result) return '';
-    return result
-      .split('\n')
-      .map((line) => {
-        if (line.trim().endsWith(':')) {
-          return `*${line.replace(':', '')}*:`; // bold
-        } else if (line.trim()) {
-          return `🔴${line.trim()}`;
-        }
-        return '';
-      })
-      .join('\n');
+    const grouped = groupByCity(result);
+    return ORDERED_KEYS.map((key) => {
+      const arabicName = CITY_MAP[key];
+      const lines = grouped[key] || [];
+      if (lines.length === 0) return '';
+      return `*${arabicName}*:\n${lines.map((line) => `🔴${line}`).join('\n')}`;
+    }).filter(Boolean).join('\n\n');
+  };
+
+  const groupByCity = (text) => {
+    const lines = text.split('\n');
+    const result = {};
+    let currentKey = null;
+
+    for (const line of lines) {
+      if (line.trim().endsWith(':')) {
+        const key = Object.keys(CITY_MAP).find(k => CITY_MAP[k] === line.replace(':', '').trim());
+        currentKey = key || line;
+        result[currentKey] = [];
+      } else if (currentKey && line.trim()) {
+        result[currentKey].push(line.replace(/^🔴+/, '').trim());
+      }
+    }
+    return result;
   };
 
   const handleCopy = () => {
@@ -174,9 +163,9 @@ export default function SearchIps() {
   };
 
   return (
-    <div className="container py-4 bg-light">
-      <div className="bg-white shadow rounded p-4 w-100" style={{ maxWidth: '700px', margin: '0 auto' }}>
-        <h1 className="h4 text-center mb-4">البحث عن عناوين IP</h1>
+    <div className="container py-4">
+      <div className="bg-white shadow rounded p-3 w-100">
+        <h1 className="h5 text-center mb-3">البحث عن عناوين IP</h1>
 
         {status === 'success' && (
           <div className="alert alert-success d-flex align-items-center gap-2">
@@ -256,23 +245,28 @@ export default function SearchIps() {
                 </button>
               </div>
             </div>
+
             <div className="bg-light border rounded p-3 text-muted small overflow-auto">
-              {result.split('\n').map((line, idx) => (
-                <div key={idx} className="d-flex align-items-start">
-                  {line.endsWith(':') ? (
-                    <span className="fw-bold">{line}</span>
-                  ) : (
-                    <>
-                      <span className="text-danger me-2">🔴</span>
-                      <span>{line}</span>
-                    </>
-                  )}
-                </div>
-              ))}
+              {ORDERED_KEYS.map((key) => {
+                const arabicName = CITY_MAP[key];
+                const lines = groupByCity(result)[key] || [];
+                if (lines.length === 0) return null;
+                return (
+                  <div key={key}>
+                    <span className="fw-bold">{arabicName}:</span>
+                    {lines.map((line, idx) => (
+                      <div key={idx} className="d-flex align-items-start">
+                        <span className="text-danger me-2">🔴</span>
+                        <span>{line}</span>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
       </div>
     </div>
   );
-    }
+            }
