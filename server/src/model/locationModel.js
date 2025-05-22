@@ -21,8 +21,30 @@ const findNamesByIps = async (table, ips) => {
   return res.rows;
 };
 
+
+const getAllIPsAndNames = async () => {
+  const tables = ['al_tabaqa', 'al_raqqa', 'kobani'];
+  const results = [];
+
+  for (const table of tables) {
+    const queryResult = await pool.query(`SELECT ip, name FROM ${table}`);
+    queryResult.rows.forEach(row => {
+      results.push({
+        table,
+        ip: row.ip,
+        name: row.name
+      });
+    });
+  }
+
+  return results;
+};
+
+
+
 module.exports = {
   getAllFromTable,
   insertIntoTable,
   findNamesByIps,
+  getAllIPsAndNames
 };
