@@ -39,8 +39,31 @@ const findIpsInTables = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+const getAllIPsAndNames = async () => {
+  try {
+    const tables = ['al_tabaqa', 'al_raqqa', 'kobani'];
+    const results = [];
+
+    for (const table of tables) {
+      const queryResult = await pool.query(`SELECT ip, name FROM ${table}`);
+      queryResult.rows.forEach(row => {
+        results.push({
+          table: table,
+          ip: row.ip,
+          name: row.name
+        });
+      });
+    }
+
+    return results;
+  } catch (err) {
+    console.error('Error fetching data:', err);
+    return [];
+  }
+};
 
 module.exports = {
   addLocation,
   findIpsInTables,
+  getAllIPsAndNames
 };
