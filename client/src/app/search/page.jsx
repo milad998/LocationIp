@@ -1,5 +1,6 @@
 // pages/search-ips.js 'use client'; import { useState } from 'react';
 "use client"
+import {useState} from 'react'
 export default function SearchIps() {
   const [ips, setIps] = useState('');
   const [result, setResult] = useState('');
