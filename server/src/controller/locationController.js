@@ -65,8 +65,20 @@ const getAllIPsAndNames = async () => {
   }
 };
 
+const fetchDevices = async (req, res) => {
+  try {
+    const devices = await model.getAllIPsAndNames();
+    res.json(devices);
+  } catch (err) {
+    console.error('Controller error:', err);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+
+
 module.exports = {
   addLocation,
   findIpsInTables,
-  getAllIPsAndNames
+  fetchDevices
 };
