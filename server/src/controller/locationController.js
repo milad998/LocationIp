@@ -28,9 +28,9 @@ const findIpsInTables = async (req, res) => {
     for (const table of tables) {
       const matches = await model.findNamesByIps(table, ips);
       if (matches.length > 0) {
-        result += `\n${table}:\n`;
+        result += `${table}:\n`;
         for (const row of matches) {
-          result += `• ${row.name}\n`;
+          result += `${row.name}\n`;
         }
       }
     }
