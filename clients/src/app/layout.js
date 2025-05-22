@@ -1,8 +1,10 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap/dist/js/bootstrap.bundle.min.js'; // هذا هو المهم لتفعيل collapse
-import NavbarComponent from './Navbar'
+import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+
+import NavbarComponent from './Navbar';
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -22,7 +24,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <NavbarComponent/>
+        <NavbarComponent />
         {children}
       </body>
     </html>
