@@ -114,7 +114,33 @@ export default function SearchIps() {
         body: JSON.stringify({ ips: ipList }),
       });
       const text = await res.text();
-      setResult(text);
+
+      // ترتيب النتائج حسب المدن
+      const cityOrder = ['al_raqqa', 'al_tabaqa', 'kobani'];
+      const groupedLines = {};
+      const lines = text.split('\n');
+      let currentCity = '';
+      for (const line of lines) {
+        if (line.trim().endsWith(':')) {
+          currentCity = line.replace(':', '').trim();
+          groupedLines[currentCity] = [];
+        } else if (line.trim()) {
+          if (currentCity) {
+            groupedLines[currentCity].push(line.trim());
+          }
+        }
+      }
+
+      let sortedText = '';
+      for (const cityKey of cityOrder) {
+        if (groupedLines[cityKey]) {
+          const arabicName = CITY_MAP[cityKey] || cityKey;
+          sortedText += `${arabicName}:\n`;
+          sortedText += groupedLines[cityKey].map((l) => `🔴${l}`).join('\n') + '\n';
+        }
+      }
+
+      setResult(sortedText.trim());
       setStatus(res.ok ? 'success' : 'error');
     } catch (err) {
       setResult('حدث خطأ في الاتصال بالسيرفر.');
@@ -126,18 +152,17 @@ export default function SearchIps() {
 
   const formatResultForWhatsapp = () => {
     if (!result) return '';
-    const lines = result.split('\n');
-    let whatsappText = '';
-    for (const line of lines) {
-      if (line.trim().endsWith(':')) {
-        const key = line.replace(':', '').trim();
-        const arabicName = CITY_MAP[key] || key;
-        whatsappText += `*${arabicName}*:`;
-      } else if (line.trim()) {
-        whatsappText += `\n🔴${line.trim()}\n`;
-      }
-    }
-    return whatsappText.trim();
+    return result
+      .split('\n')
+      .map((line) => {
+        if (line.trim().endsWith(':')) {
+          return `*${line.replace(':', '')}*:`; // bold
+        } else if (line.trim()) {
+          return `🔴${line.trim()}`;
+        }
+        return '';
+      })
+      .join('\n');
   };
 
   const handleCopy = () => {
@@ -149,8 +174,8 @@ export default function SearchIps() {
   };
 
   return (
-    <div className="container d-flex align-items-center justify-content-center min-vh-100 bg-light">
-      <div className="bg-white shadow rounded p-4 w-100" style={{ maxWidth: '700px' }}>
+    <div className="container py-4 bg-light">
+      <div className="bg-white shadow rounded p-4 w-100" style={{ maxWidth: '700px', margin: '0 auto' }}>
         <h1 className="h4 text-center mb-4">البحث عن عناوين IP</h1>
 
         {status === 'success' && (
@@ -176,7 +201,7 @@ export default function SearchIps() {
                 onChange={handleInputChange}
                 onKeyDown={handleKeyDown}
                 ref={textareaRef}
-              ></input>
+              />
               {ips && (
                 <X
                   size={18}
@@ -235,7 +260,7 @@ export default function SearchIps() {
               {result.split('\n').map((line, idx) => (
                 <div key={idx} className="d-flex align-items-start">
                   {line.endsWith(':') ? (
-                    <span className="fw-bold">{CITY_MAP[line.replace(':', '').trim()] || line}</span>
+                    <span className="fw-bold">{line}</span>
                   ) : (
                     <>
                       <span className="text-danger me-2">🔴</span>
@@ -250,4 +275,4 @@ export default function SearchIps() {
       </div>
     </div>
   );
-      }
+    }
