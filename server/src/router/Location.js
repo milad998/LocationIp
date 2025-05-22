@@ -8,4 +8,5 @@ router.post('/locations/:table', controller.addLocation);
 
 router.post('/locations/search/ips', controller.findIpsInTables);
 router.get("/all",controller.fetchDevices);
+router.delete("/ip/:name",controller.deleteDevice);
 module.exports = router;
