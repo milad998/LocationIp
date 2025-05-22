@@ -6,7 +6,7 @@ export default function NavbarComponent() {
   return (
     <nav className="navbar navbar-expand-lg bg-white px-3">
       <div className="collapse navbar-collapse show w-100 justify-content-center" id="navbarContent">
-        <ul className="navbar-nav d-flex flex-row gap-3">
+        <ul className="navbar-nav d-flex flex-row gap-3 justify-content-center align-items-center">
           <li className="nav-item">
             <Link href="/" className="nav-link p-2">
               <Home size={22} />
