@@ -11,6 +11,7 @@ export default function Home() {
       try {
         const res = await fetch("http://localhost:8000/api/all");
         const json = await res.json();
+        console.log("Fetched data:", json); // لمراقبة البيانات
         setData(json);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -19,39 +20,6 @@ export default function Home() {
 
     fetchIPs();
   }, []);
-
-  const filteredData = data.filter(
-    (item) =>
-      item.name.toLowerCase().includes(search.toLowerCase()) ||
-      item.ip.includes(search)
-  );
-
-  const renderTable = (city) => {
-    const cityData = filteredData.filter((item) => item.table === city);
-    if (cityData.length === 0) return null;
-
-    return (
-      <div key={city} style={{ marginBottom: "40px" }}>
-        <h2>{city}</h2>
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
-          <thead>
-            <tr>
-              <th style={thStyle}>الاسم</th>
-              <th style={thStyle}>IP</th>
-            </tr>
-          </thead>
-          <tbody>
-            {cityData.map((item, index) => (
-              <tr key={index}>
-                <td style={tdStyle}>{item.name}</td>
-                <td style={tdStyle}>{item.ip}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    );
-  };
 
   const thStyle = {
     border: "1px solid #ccc",
@@ -64,6 +32,41 @@ export default function Home() {
     border: "1px solid #ccc",
     padding: "10px",
     textAlign: "right",
+  };
+
+  const renderTable = (city) => {
+    const cityData = data.filter((item) => item.table === city);
+    const filteredCityData = cityData.filter(
+      (item) =>
+        item.name?.toLowerCase().includes(search.toLowerCase()) ||
+        item.ip?.includes(search)
+    );
+
+    return (
+      <div key={city} style={{ marginBottom: "40px" }}>
+        <h2>{city}</h2>
+        {filteredCityData.length === 0 ? (
+          <p>لا توجد نتائج مطابقة.</p>
+        ) : (
+          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <thead>
+              <tr>
+                <th style={thStyle}>الاسم</th>
+                <th style={thStyle}>IP</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredCityData.map((item, index) => (
+                <tr key={index}>
+                  <td style={tdStyle}>{item.name}</td>
+                  <td style={tdStyle}>{item.ip}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+    );
   };
 
   return (
@@ -87,4 +90,4 @@ export default function Home() {
       {["الرقة", "الطبقة", "كوباني"].map(renderTable)}
     </div>
   );
-  }
+      }
