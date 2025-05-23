@@ -44,25 +44,25 @@ export default function SearchIps() {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+  
+useEffect(() => {
+  if (!result) {
+    setHighlightedResult('');
+    return;
+  }
 
-  useEffect(() => {
-    if (!result) {
-      setHighlightedResult('');
-      return;
+  const lines = result.split('\n').map((line) => {
+    if (
+      line.startsWith('🔴') &&
+      line.slice(2).toLowerCase().includes(searchTerm.toLowerCase())
+    ) {
+      return line.replace('🔴', '🟢');
     }
+    return line;
+  });
 
-    const lines = result.split('\n').map((line) => {
-      if (
-        line.startsWith('🔴') &&
-        line.toLowerCase().includes(searchTerm.toLowerCase())
-      ) {
-        return line.replace('🔴', '🟢');
-      }
-      return line;
-    });
-
-    setHighlightedResult(lines.join('\n'));
-  }, [searchTerm, result]);
+  setHighlightedResult(lines.join('\n'));
+}, [searchTerm, result]);
 
   const handleInputChange = (e) => {
     const value = e.target.value;
