@@ -45,25 +45,26 @@ export default function SearchIps() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
   
-useEffect(() => {
+  useEffect(() => {
   if (!result) {
     setHighlightedResult('');
     return;
   }
 
   const lines = result.split('\n').map((line) => {
-    if (
-      line.startsWith('🔴') &&
-      line.slice(2).toLowerCase().includes(searchTerm.toLowerCase())
-    ) {
-      return line.replace('🔴', '🟢');
+    if (line.startsWith('🔴') || line.startsWith('🟢')) {
+      const content = line.slice(2); // remove symbol
+      if (searchTerm && content.toLowerCase().includes(searchTerm.toLowerCase())) {
+        return `🟢${content}`;
+      }
+      return `🔴${content}`;
     }
-    return line;
+    return line; // keep section titles etc.
   });
 
   setHighlightedResult(lines.join('\n'));
 }, [searchTerm, result]);
-
+  
   const handleInputChange = (e) => {
     const value = e.target.value;
     setIps(value);
@@ -266,19 +267,26 @@ useEffect(() => {
               </div>
             </div>
             <div className="bg-light border rounded p-3 text-muted small overflow-auto">
-              {(highlightedResult || result).split('\n').map((line, idx) => (
-                <div key={idx} className="d-flex align-items-start">
-                  {line.endsWith(':') ? (
-                    <span className="fw-bold">{CITY_MAP[line.replace(':', '').trim()] || line}</span>
-                  ) : (
-                    <>
-                      <span className="me-2">{line.startsWith('🟢') ? '🟢' : '🔴'}</span>
-                      <span>{line.slice(2)}</span>
-                    </>
-                  )}
-                </div>
-              ))}
-            </div>
+  {(highlightedResult || result).split('\n').map((line, idx) => {
+    const isTitle = line.endsWith(':');
+    const symbol = line.startsWith('🟢') ? '🟢' : line.startsWith('🔴') ? '🔴' : null;
+    const content = symbol ? line.slice(2) : line;
+
+    return (
+      <div key={idx} className="d-flex align-items-start">
+        {isTitle ? (
+          <span className="fw-bold">{CITY_MAP[content.replace(':', '').trim()] || line}</span>
+        ) : (
+          <>
+            <span className="me-2">{symbol}</span>
+            <span>{content}</span>
+          </>
+        )}
+      </div>
+    );
+  })}
+</div>
+
           </div>
         )}
       </div>
