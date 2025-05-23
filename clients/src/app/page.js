@@ -87,7 +87,7 @@ export default function Home() {
           border: "1px solid #ccc",
         }}
       />
-      {["al_raqa", "al_tabaqa", "kobani"].map(renderTable)}
+      {["al_raqqa", "al_tabaqa", "kobani"].map(renderTable)}
     </div>
   );
       }
