@@ -28,8 +28,18 @@ const formatResultForDisplay = () => { if (!result) return []; const filter = fi
 
 const handleCopy = () => { navigator.clipboard.writeText(result); };
 
-const handleCopyWhatsapp = () => { const lines = formatResultForDisplay(); let whatsappText = ''; for (const line of lines) { if (line.type === 'header') { whatsappText += *${line.text}*:\n; } else if (line.type === 'item') { whatsappText += ${line.icon}${line.text}\n; } } navigator.clipboard.writeText(whatsappText.trim()); };
-
+const handleCopyWhatsapp = () => {
+  const lines = formatResultForDisplay();
+  let whatsappText = '';
+  for (const line of lines) {
+    if (line.type === 'header') {
+      whatsappText += `*${line.text}*:\n`;
+    } else if (line.type === 'item') {
+      whatsappText += `${line.icon}${line.text}\n`;
+    }
+  }
+  navigator.clipboard.writeText(whatsappText.trim());
+};
 return ( <div className="container d-flex align-items-center justify-content-center min-vh-100 bg-light"> <div className="bg-white shadow rounded p-4 w-100" style={{ maxWidth: '700px' }}> <h1 className="h4 text-center mb-4">البحث عن عناوين IP</h1>
 
 {status === 'success' && (
