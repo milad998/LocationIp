@@ -101,22 +101,23 @@ export default function SearchIps() {
   };
 
   const handleSearchKeyDown = (e) => {
-    if (searchSuggestions.length === 0) return;
-    if (e.key === 'ArrowDown') {
-      e.preventDefault();
-      setHighlightSearchIndex((prev) => (prev + 1) % searchSuggestions.length);
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault();
-      setHighlightSearchIndex((prev) =>
-        prev <= 0 ? searchSuggestions.length - 1 : prev - 1
-      );
-    } else if (e.key === 'Enter' && highlightSearchIndex >= 0) {
-      e.preventDefault();
-      const chosen = searchSuggestions[highlightSearchIndex];
-      setSearchTerm(chosen);
-      setSearchSuggestions([]);
-    }
-  };
+  if (searchSuggestions.length === 0) return;
+
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    setHighlightSearchIndex((prev) => (prev + 1) % searchSuggestions.length);
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    setHighlightSearchIndex((prev) =>
+      prev <= 0 ? searchSuggestions.length - 1 : prev - 1
+    );
+  } else if (e.key === 'Enter' && highlightSearchIndex >= 0) {
+    e.preventDefault();
+    const chosen = searchSuggestions[highlightSearchIndex];
+    setSearchTerm((prev) => (prev + ' ' + chosen).trim());
+    setSearchSuggestions([]);
+  }
+};
 
   const handleClear = () => {
     setIps('');
@@ -286,9 +287,9 @@ export default function SearchIps() {
                     className={`list-group-item list-group-item-action ${idx === highlightSearchIndex ? 'active' : ''}`}
                     style={{ cursor: 'pointer' }}
                     onClick={() => {
-                      setSearchTerm(s);
-                      setSearchSuggestions([]);
-                    }}
+  setSearchTerm((prev) => (prev + ' ' + s).trim());
+  setSearchSuggestions([]);
+}}
                   >
                     {s}
                   </li>
