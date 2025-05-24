@@ -17,6 +17,9 @@ export default function SearchIps() {
   const [allData, setAllData] = useState([]);
   const [highlightIndex, setHighlightIndex] = useState(-1);
   const [searchTerm, setSearchTerm] = useState('');
+  const [searchSuggestions, setSearchSuggestions] = useState([]);
+  const [highlightSearchIndex, setHighlightSearchIndex] = useState(-1);
+
   const containerRef = useRef();
   const textareaRef = useRef();
 
@@ -38,6 +41,8 @@ export default function SearchIps() {
       if (containerRef.current && !containerRef.current.contains(e.target)) {
         setSuggestions([]);
         setHighlightIndex(-1);
+        setSearchSuggestions([]);
+        setHighlightSearchIndex(-1);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -95,12 +100,31 @@ export default function SearchIps() {
     }
   };
 
+  const handleSearchKeyDown = (e) => {
+    if (searchSuggestions.length === 0) return;
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setHighlightSearchIndex((prev) => (prev + 1) % searchSuggestions.length);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setHighlightSearchIndex((prev) =>
+        prev <= 0 ? searchSuggestions.length - 1 : prev - 1
+      );
+    } else if (e.key === 'Enter' && highlightSearchIndex >= 0) {
+      e.preventDefault();
+      const chosen = searchSuggestions[highlightSearchIndex];
+      setSearchTerm(chosen);
+      setSearchSuggestions([]);
+    }
+  };
+
   const handleClear = () => {
     setIps('');
     setSuggestions([]);
     setResult('');
     setStatus(null);
     setSearchTerm('');
+    setSearchSuggestions([]);
   };
 
   const handleSearch = async (e) => {
@@ -152,24 +176,34 @@ export default function SearchIps() {
 
   const getDisplayResult = () => {
     if (!result) return [];
-
     return result.split('\n').map((line) => {
       const trimmed = line.trim();
       if (!trimmed) return '';
-
       if (trimmed.endsWith(':')) return trimmed;
-
       const hasSymbol = trimmed.startsWith('🔴') || trimmed.startsWith('🟢');
       const symbol = hasSymbol ? trimmed.slice(0, 2) : '';
       const content = hasSymbol ? trimmed.slice(2).trim() : trimmed;
-
       if (searchTerm && content.toLowerCase().includes(searchTerm.toLowerCase())) {
         return `🟢 ${content}`;
       }
-
       return `${symbol || '🔴'} ${content}`;
     });
   };
+
+  useEffect(() => {
+    if (!searchTerm.trim()) {
+      setSearchSuggestions([]);
+      return;
+    }
+    const term = searchTerm.toLowerCase();
+    const lines = result.split('\n').filter(line => {
+      const trimmed = line.trim();
+      return trimmed && !trimmed.endsWith(':') && trimmed.toLowerCase().includes(term);
+    });
+    const uniqueLines = Array.from(new Set(lines)).slice(0, 10);
+    setSearchSuggestions(uniqueLines);
+    setHighlightSearchIndex(-1);
+  }, [searchTerm, result]);
 
   return (
     <div className="container d-flex align-items-center justify-content-center min-vh-100 bg-light">
@@ -229,7 +263,7 @@ export default function SearchIps() {
             )}
           </div>
 
-          <div className="mb-3">
+          <div className="mb-3 position-relative">
             <label className="form-label">بحث في النتائج</label>
             <input
               className="form-control"
@@ -237,7 +271,25 @@ export default function SearchIps() {
               placeholder="ابحث عن IP أو اسم لتغيير 🔴 إلى 🟢"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyDown={handleSearchKeyDown}
             />
+            {searchSuggestions.length > 0 && (
+              <ul className="list-group position-absolute w-100 z-3" style={{ top: '100%', left: 0 }}>
+                {searchSuggestions.map((s, idx) => (
+                  <li
+                    key={idx}
+                    className={`list-group-item list-group-item-action ${idx === highlightSearchIndex ? 'active' : ''}`}
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => {
+                      setSearchTerm(s);
+                      setSearchSuggestions([]);
+                    }}
+                  >
+                    {s}
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
 
           <button
@@ -290,5 +342,4 @@ export default function SearchIps() {
       </div>
     </div>
   );
-      }
-        
+}
