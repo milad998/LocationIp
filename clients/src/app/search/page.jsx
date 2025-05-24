@@ -11,7 +11,6 @@ const CITY_MAP = {
 export default function SearchIps() {
   const [ips, setIps] = useState('');
   const [result, setResult] = useState('');
-  const [highlightedResult, setHighlightedResult] = useState('');
   const [status, setStatus] = useState(null);
   const [loading, setLoading] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
@@ -44,27 +43,7 @@ export default function SearchIps() {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
-  
-  useEffect(() => {
-  if (!result) {
-    setHighlightedResult('');
-    return;
-  }
 
-  const lines = result.split('\n').map((line) => {
-    if (line.startsWith('🔴') || line.startsWith('🟢')) {
-      const content = line.slice(2); // remove symbol
-      if (searchTerm && content.toLowerCase().includes(searchTerm.toLowerCase())) {
-        return `🟢${content}`;
-      }
-      return `🔴${content}`;
-    }
-    return line; // keep section titles etc.
-  });
-
-  setHighlightedResult(lines.join('\n'));
-}, [searchTerm, result]);
-  
   const handleInputChange = (e) => {
     const value = e.target.value;
     setIps(value);
@@ -120,8 +99,8 @@ export default function SearchIps() {
     setIps('');
     setSuggestions([]);
     setResult('');
-    setHighlightedResult('');
     setStatus(null);
+    setSearchTerm('');
   };
 
   const handleSearch = async (e) => {
@@ -129,7 +108,6 @@ export default function SearchIps() {
     setLoading(true);
     setStatus(null);
     setResult('');
-    setHighlightedResult('');
     try {
       const ipList = ips.trim().split(/\s+/);
       const res = await fetch('http://localhost:8000/api/locations/search/ips', {
@@ -170,6 +148,24 @@ export default function SearchIps() {
 
   const handleCopyWhatsapp = () => {
     navigator.clipboard.writeText(formatResultForWhatsapp());
+  };
+
+  const getDisplayResult = () => {
+    if (!result) return [];
+
+    return result.split('\n').map((line) => {
+      if (line.trim().endsWith(':')) return line;
+
+      if (line.startsWith('🔴') || line.startsWith('🟢')) {
+        const content = line.slice(2);
+        if (searchTerm && content.toLowerCase().includes(searchTerm.toLowerCase())) {
+          return `🟢${content}`;
+        }
+        return `🔴${content}`;
+      }
+
+      return line;
+    });
   };
 
   return (
@@ -267,26 +263,25 @@ export default function SearchIps() {
               </div>
             </div>
             <div className="bg-light border rounded p-3 text-muted small overflow-auto">
-  {(highlightedResult || result).split('\n').map((line, idx) => {
-    const isTitle = line.endsWith(':');
-    const symbol = line.startsWith('🟢') ? '🟢' : line.startsWith('🔴') ? '🔴' : null;
-    const content = symbol ? line.slice(2) : line;
+              {getDisplayResult().map((line, idx) => {
+                const isTitle = line.trim().endsWith(':');
+                const symbol = line.startsWith('🟢') ? '🟢' : line.startsWith('🔴') ? '🔴' : null;
+                const content = symbol ? line.slice(2) : line;
 
-    return (
-      <div key={idx} className="d-flex align-items-start">
-        {isTitle ? (
-          <span className="fw-bold">{CITY_MAP[content.replace(':', '').trim()] || line}</span>
-        ) : (
-          <>
-            <span className="me-2">{symbol}</span>
-            <span>{content}</span>
-          </>
-        )}
-      </div>
-    );
-  })}
-</div>
-
+                return (
+                  <div key={idx} className="d-flex align-items-start">
+                    {isTitle ? (
+                      <span className="fw-bold">{CITY_MAP[content.replace(':', '').trim()] || content}</span>
+                    ) : (
+                      <>
+                        <span className="me-2">{symbol}</span>
+                        <span>{content}</span>
+                      </>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </div>
         )}
       </div>
