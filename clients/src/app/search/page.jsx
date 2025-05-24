@@ -75,7 +75,7 @@ export default function SearchIps() {
     setSuggestions([]);
     setHighlightIndex(-1);
     setTimeout(() => {
-      if (textareaRef.current) textareaRef.current.focus();
+      textareaRef.current?.focus();
     }, 0);
   };
 
