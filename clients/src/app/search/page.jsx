@@ -154,17 +154,16 @@ export default function SearchIps() {
     if (!result) return [];
 
     return result.split('\n').map((line) => {
-      if (line.trim().endsWith(':')) return line;
+      const trimmed = line.trim();
+      if (!trimmed) return '';
 
-      if (line.startsWith('🔴') || line.startsWith('🟢')) {
-        const content = line.slice(2);
-        if (searchTerm && content.toLowerCase().includes(searchTerm.toLowerCase())) {
-          return `🟢${content}`;
-        }
-        return `🔴${content}`;
+      if (trimmed.endsWith(':')) return trimmed;
+
+      if (searchTerm && trimmed.toLowerCase().includes(searchTerm.toLowerCase())) {
+        return `🟢${trimmed}`;
       }
 
-      return line;
+      return `🔴${trimmed}`;
     });
   };
 
@@ -269,7 +268,7 @@ export default function SearchIps() {
                 const content = symbol ? line.slice(2) : line;
 
                 return (
-                  <div key={idx} className="d-flex align-items-start">
+                  <div key={idx} className="d-flex align-items-start mb-1">
                     {isTitle ? (
                       <span className="fw-bold">{CITY_MAP[content.replace(':', '').trim()] || content}</span>
                     ) : (
@@ -287,4 +286,5 @@ export default function SearchIps() {
       </div>
     </div>
   );
-}
+      }
+    
