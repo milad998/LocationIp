@@ -87,14 +87,20 @@ export default function SearchIps() {
   const input = inputRef.current;
   if (!input) return;
 
-  // أضف الـ IP إلى السطر الحالي
-  const currentValue = input.value.trim();
-  const newValue = currentValue ? `${currentValue} ${ip}` : ip;
+  // احصل على النص الحالي وقسمه
+  const parts = input.value.trim().split(/\s+/);
+  // إزالة الكلمة الأخيرة (التي يتم استبدالها الآن)
+  parts.pop();
+  // أضف IP جديد
+  parts.push(ip);
+  const newValue = parts.join(' ') + ' '; // أضف مسافة بعد الإدخال
+
+  // حدث القيمة في الحقل
   input.value = newValue;
 
-  // تحديد (highlight) الـ IP الذي تم إدخاله
-  const start = newValue.length - ip.length;
-  const end = newValue.length;
+  // حدد الـ IP الجديد
+  const start = newValue.length - ip.length - 1;
+  const end = newValue.length - 1;
   input.setSelectionRange(start, end);
   input.focus();
 
