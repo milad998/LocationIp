@@ -136,7 +136,7 @@ export default function SearchIps() {
         const arabicName = CITY_MAP[key] || key;
         whatsappText += `*${arabicName}*:\n`;
       } else if (line.trim()) {
-        whatsappText += `🔴${line.trim()}\n`;
+        whatsappText += `🔴 ${line.trim()}\n`;
       }
     }
     return whatsappText.trim();
@@ -159,11 +159,15 @@ export default function SearchIps() {
 
       if (trimmed.endsWith(':')) return trimmed;
 
-      if (searchTerm && trimmed.toLowerCase().includes(searchTerm.toLowerCase())) {
-        return `🟢${trimmed}`;
+      const hasSymbol = trimmed.startsWith('🔴') || trimmed.startsWith('🟢');
+      const symbol = hasSymbol ? trimmed.slice(0, 2) : '';
+      const content = hasSymbol ? trimmed.slice(2).trim() : trimmed;
+
+      if (searchTerm && content.toLowerCase().includes(searchTerm.toLowerCase())) {
+        return `🟢 ${content}`;
       }
 
-      return `🔴${trimmed}`;
+      return `${symbol || '🔴'} ${content}`;
     });
   };
 
@@ -265,7 +269,7 @@ export default function SearchIps() {
               {getDisplayResult().map((line, idx) => {
                 const isTitle = line.trim().endsWith(':');
                 const symbol = line.startsWith('🟢') ? '🟢' : line.startsWith('🔴') ? '🔴' : null;
-                const content = symbol ? line.slice(2) : line;
+                const content = symbol ? line.slice(2).trim() : line;
 
                 return (
                   <div key={idx} className="d-flex align-items-start mb-1">
@@ -273,7 +277,7 @@ export default function SearchIps() {
                       <span className="fw-bold">{CITY_MAP[content.replace(':', '').trim()] || content}</span>
                     ) : (
                       <>
-                        <span className="me-2">{symbol}</span>
+                        {symbol && <span className="me-2">{symbol}</span>}
                         <span>{content}</span>
                       </>
                     )}
@@ -287,4 +291,4 @@ export default function SearchIps() {
     </div>
   );
       }
-    
+        
