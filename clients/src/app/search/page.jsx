@@ -175,7 +175,7 @@ export default function SearchIps() {
     navigator.clipboard.writeText(formatResultForWhatsapp());
   };
 
-  const getDisplayResult = () => {
+  /*const getDisplayResult = () => {
   if (!result) return [];
   const terms = searchTerm
     .split(/\s+/)
@@ -192,6 +192,27 @@ export default function SearchIps() {
     const content = hasSymbol ? trimmed.slice(2).trim() : trimmed;
 
     const isMatched = terms.some((term) => content.toLowerCase().includes(term));
+    return `${isMatched ? '🟢' : symbol || '🔴'} ${content}`;
+  });
+};*/
+  const getDisplayResult = () => {
+  if (!result) return [];
+
+  const terms = searchTerm
+    .split(/\s+/)
+    .map((term) => term.trim())
+    .filter(Boolean);
+
+  return result.split('\n').map((line) => {
+    const trimmed = line.trim();
+    if (!trimmed) return '';
+    if (trimmed.endsWith(':')) return trimmed;
+
+    const hasSymbol = trimmed.startsWith('🔴') || trimmed.startsWith('🟢');
+    const symbol = hasSymbol ? trimmed.slice(0, 2) : '';
+    const content = hasSymbol ? trimmed.slice(2).trim() : trimmed;
+
+    const isMatched = terms.some((term) => content.includes(term));
     return `${isMatched ? '🟢' : symbol || '🔴'} ${content}`;
   });
 };
