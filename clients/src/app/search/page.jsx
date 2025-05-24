@@ -197,19 +197,23 @@ export default function SearchIps() {
 };
 
   useEffect(() => {
-    if (!searchTerm.trim()) {
-      setSearchSuggestions([]);
-      return;
-    }
-    const term = searchTerm.toLowerCase();
-    const lines = result.split('\n').filter(line => {
-      const trimmed = line.trim();
-      return trimmed && !trimmed.endsWith(':') && trimmed.toLowerCase().includes(term);
-    });
-    const uniqueLines = Array.from(new Set(lines)).slice(0, 10);
-    setSearchSuggestions(uniqueLines);
-    setHighlightSearchIndex(-1);
-  }, [searchTerm, result]);
+  if (!searchTerm.trim()) {
+    setSearchSuggestions([]);
+    return;
+  }
+  const term = searchTerm.toLowerCase();
+
+  const lines = result.split('\n').filter(line => {
+    const trimmed = line.trim();
+    const isIP = /^\d{1,3}(\.\d{1,3}){3}$/.test(trimmed); // يتحقق هل السطر هو IP
+    return trimmed && !trimmed.endsWith(':') && !isIP && trimmed.toLowerCase().includes(term);
+  });
+
+  const uniqueLines = Array.from(new Set(lines)).slice(0, 10);
+  setSearchSuggestions(uniqueLines);
+  setHighlightSearchIndex(-1);
+}, [searchTerm, result]);
+
 
   return (
     <div className="container d-flex align-items-center justify-content-center min-vh-100 bg-light">
@@ -287,13 +291,11 @@ export default function SearchIps() {
                     className={`list-group-item list-group-item-action ${idx === highlightSearchIndex ? 'active' : ''}`}
                     style={{ cursor: 'pointer' }}
                     onClick={() => {
-                       const terms = searchTerm.split(/\s+/);
-                       if (!terms.includes(s)) {
-                       const updated = [...terms, s].filter(Boolean).join(' ');
-                       setSearchTerm(updated);
-  }
-  setSearchSuggestions([]);
-}}
+                      const cleanText = s.trim();
+                      const updated = searchTerm ? `${searchTerm} ${cleanText}`.trim() : cleanText;
+                      setSearchTerm(updated);
+                      setSearchSuggestions([]);
+                    }}
                   >
                     {s}
                   </li>
