@@ -287,7 +287,11 @@ export default function SearchIps() {
                     className={`list-group-item list-group-item-action ${idx === highlightSearchIndex ? 'active' : ''}`}
                     style={{ cursor: 'pointer' }}
                     onClick={() => {
-  setSearchTerm((prev) => (prev + ' ' + s).trim());
+                       const terms = searchTerm.split(/\s+/);
+                       if (!terms.includes(s)) {
+                       const updated = [...terms, s].filter(Boolean).join(' ');
+                       setSearchTerm(updated);
+  }
   setSearchSuggestions([]);
 }}
                   >
