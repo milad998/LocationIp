@@ -70,7 +70,7 @@ export default function SearchIps() {
     setHighlightIndex(-1);
   };
 
-  const handleSuggestionClick = (entry) => {
+/*  const handleSuggestionClick = (entry) => {
     const tokens = ips.trim().split(/\s+/);
     tokens.pop();
     tokens.push(entry.ip);
@@ -82,7 +82,24 @@ export default function SearchIps() {
     setTimeout(() => {
       textareaRef.current?.focus();
     }, 0);
-  };
+  };*/
+  const handleSuggestionClick = (ip: string) => {
+  const input = inputRef.current;
+  if (!input) return;
+
+  // أضف الـ IP إلى السطر الحالي
+  const currentValue = input.value.trim();
+  const newValue = currentValue ? `${currentValue} ${ip}` : ip;
+  input.value = newValue;
+
+  // تحديد (highlight) الـ IP الذي تم إدخاله
+  const start = newValue.length - ip.length;
+  const end = newValue.length;
+  input.setSelectionRange(start, end);
+  input.focus();
+
+  setShowSuggestions(false);
+};
 
   const handleKeyDown = (e) => {
     if (suggestions.length === 0) return;
