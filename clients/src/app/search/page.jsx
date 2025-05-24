@@ -175,20 +175,25 @@ export default function SearchIps() {
   };
 
   const getDisplayResult = () => {
-    if (!result) return [];
-    return result.split('\n').map((line) => {
-      const trimmed = line.trim();
-      if (!trimmed) return '';
-      if (trimmed.endsWith(':')) return trimmed;
-      const hasSymbol = trimmed.startsWith('🔴') || trimmed.startsWith('🟢');
-      const symbol = hasSymbol ? trimmed.slice(0, 2) : '';
-      const content = hasSymbol ? trimmed.slice(2).trim() : trimmed;
-      if (searchTerm && content.toLowerCase().includes(searchTerm.toLowerCase())) {
-        return `🟢 ${content}`;
-      }
-      return `${symbol || '🔴'} ${content}`;
-    });
-  };
+  if (!result) return [];
+  const terms = searchTerm
+    .split(/\s+/)
+    .map((term) => term.toLowerCase().trim())
+    .filter(Boolean);
+
+  return result.split('\n').map((line) => {
+    const trimmed = line.trim();
+    if (!trimmed) return '';
+    if (trimmed.endsWith(':')) return trimmed;
+
+    const hasSymbol = trimmed.startsWith('🔴') || trimmed.startsWith('🟢');
+    const symbol = hasSymbol ? trimmed.slice(0, 2) : '';
+    const content = hasSymbol ? trimmed.slice(2).trim() : trimmed;
+
+    const isMatched = terms.some((term) => content.toLowerCase().includes(term));
+    return `${isMatched ? '🟢' : symbol || '🔴'} ${content}`;
+  });
+};
 
   useEffect(() => {
     if (!searchTerm.trim()) {
