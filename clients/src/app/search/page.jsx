@@ -225,21 +225,18 @@ const getDisplayResult = () => {
     }
   });
 
-  // متابعة باقي الدالة...
-};
+  const orderedKeys = ['al_raqqa', 'al_tabaqa', 'kobani'];
+  const finalResult = [];
 
-    const orderedKeys = ['al_raqqa', 'al_tabaqa', 'kobani'];
-    const finalResult = [];
-
-    for (const key of orderedKeys) {
-      if (blocks[key]) {
-        finalResult.push(`${key}:`);
-        finalResult.push(...blocks[key]);
-      }
+  for (const key of orderedKeys) {
+    if (blocks[key]) {
+      finalResult.push(`${key}:`);
+      finalResult.push(...blocks[key]);
     }
+  }
 
-    return finalResult;
-  };
+  return finalResult;
+};
 
   useEffect(() => {
     if (!searchTerm.trim()) {
