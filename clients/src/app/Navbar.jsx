@@ -18,7 +18,7 @@ export default function NavbarComponent() {
             </Link>
           </li>
           <li className="nav-item">
-            <Link href="/delete" className="nav-link p-2">
+            <Link href="/del" className="nav-link p-2">
               <Trash2 size={22} />
             </Link>
           </li>
