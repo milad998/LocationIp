@@ -155,20 +155,37 @@ export default function SearchIps() {
   };
 
   const formatResultForWhatsapp = () => {
-    if (!result) return '';
-    const lines = result.split('\n');
-    let whatsappText = '';
-    for (const line of lines) {
-      if (line.trim().endsWith(':')) {
-        const key = line.replace(':', '').trim();
-        const arabicName = CITY_MAP[key] || key;
-        whatsappText += `*${arabicName}*:\n`;
-      } else if (line.trim()) {
-        whatsappText += `🔴 ${line.trim()}\n`;
+  const formatResultForWhatsapp = () => {
+  if (!result) return '';
+
+  const lines = result.split('\n');
+  const grouped = {};
+  let currentKey = '';
+
+  for (const line of lines) {
+    if (line.trim().endsWith(':')) {
+      currentKey = line.replace(':', '').trim();
+      grouped[currentKey] = [];
+    } else if (line.trim() && currentKey) {
+      grouped[currentKey].push(line.trim());
+    }
+  }
+
+  const order = ['al_raqqa', 'al_tabaqa', 'kobani']; // ترتيب المدن
+
+  let whatsappText = 'وضع المسار:\n';
+  for (const key of order) {
+    if (grouped[key]?.length) {
+      const arabicName = CITY_MAP[key] || key;
+      whatsappText += `*${arabicName}*:\n`;
+      for (const item of grouped[key]) {
+        whatsappText += `🔴 ${item}\n`;
       }
     }
-    return whatsappText.trim();
-  };
+  }
+
+  return whatsappText.trim();
+};
 
   const handleCopy = () => {
     navigator.clipboard.writeText(result);
