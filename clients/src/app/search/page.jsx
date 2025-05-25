@@ -198,10 +198,17 @@ export default function SearchIps() {
 const getDisplayResult = () => {
   if (!result) return [];
 
-  const terms = searchTerm
+  const searchWords = searchTerm
+    .toLowerCase()
     .split(/\s+/)
-    .map(term => term.trim())
     .filter(Boolean);
+
+  const ipWords = ips
+    .toLowerCase()
+    .split(/\s+/)
+    .filter(Boolean);
+
+  const terms = [...new Set([...searchWords, ...ipWords])]; // تجميع كل كلمات البحث
 
   const blocks = {};
   let currentKey = null;
@@ -218,8 +225,9 @@ const getDisplayResult = () => {
       const symbol = hasSymbol ? trimmed.slice(0, 2) : '🔴';
       const content = hasSymbol ? trimmed.slice(2).trim() : trimmed;
 
-      const contentWords = content.split(/\s+/);
-      const isMatched = terms.some(term => contentWords.some(word => word === term));
+      const isMatched = terms.some(term =>
+        content.toLowerCase().includes(term)
+      );
       const lineWithStatus = `${isMatched ? '🟢' : symbol} ${content}`;
       blocks[currentKey].push(lineWithStatus);
     }
@@ -239,30 +247,29 @@ const getDisplayResult = () => {
 };
 
   useEffect(() => {
-    if (!searchTerm.trim()) {
-      setSearchSuggestions([]);
-      return;
-    }
-    const term = searchTerm.toLowerCase();
+  if (!searchTerm.trim()) {
+    setSearchSuggestions([]);
+    return;
+  }
 
-    const lines = result
-      .split('\n')
-      .filter((line) => {
-        const trimmed = line.trim();
-        const isIP = /^\d{1,3}(\.\d{1,3}){3}$/.test(trimmed);
-        return (
-          trimmed &&
-          !trimmed.endsWith(':') &&
-          !isIP &&
-          trimmed.toLowerCase().includes(term)
-        );
-      });
+  const lastWord = searchTerm.trim().split(/\s+/).pop()?.toLowerCase();
+  if (!lastWord) {
+    setSearchSuggestions([]);
+    return;
+  }
 
-    const uniqueLines = Array.from(new Set(lines)).slice(0, 10);
-    setSearchSuggestions(uniqueLines);
-    setHighlightSearchIndex(-1);
-  }, [searchTerm, result]);
+  const matches = allData.filter(
+    (entry) =>
+      entry.name?.toLowerCase().includes(lastWord) ||
+      entry.ip?.startsWith(lastWord)
+  );
 
+  const suggestions = matches.map((entry) => entry.name).slice(0, 10);
+  setSearchSuggestions(suggestions);
+  setHighlightSearchIndex(-1);
+}, [searchTerm, allData]);
+
+    
   return (
     <div className="container d-flex align-items-center justify-content-center min-vh-100 bg-light">
       <div className="bg-white shadow rounded p-4 w-100" style={{ maxWidth: '700px' }}>
@@ -341,11 +348,13 @@ const getDisplayResult = () => {
                     }`}
                     style={{ cursor: 'pointer' }}
                     onClick={() => {
-                      const cleanText = s.trim();
-                      const updated = searchTerm ? `${searchTerm} ${cleanText}`.trim() : cleanText;
-                      setSearchTerm(updated);
-                      setSearchSuggestions([]);
-                    }}
+  const parts = searchTerm.trim().split(/\s+/);
+  parts.pop(); // إزالة آخر كلمة
+  parts.push(s); // إضافة الاقتراح
+  const updated = parts.join(' ') + ' ';
+  setSearchTerm(updated);
+  setSearchSuggestions([]);
+}}
                   >
                     {s}
                   </li>
