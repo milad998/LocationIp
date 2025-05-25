@@ -195,34 +195,38 @@ export default function SearchIps() {
     if (text) navigator.clipboard.writeText(text);
   };
 
-  const getDisplayResult = () => {
-    if (!result) return [];
+const getDisplayResult = () => {
+  if (!result) return [];
 
-    const terms = searchTerm
-      .split(/\s+/)
-      .map((term) => term.trim())
-      .filter(Boolean);
+  const terms = searchTerm
+    .split(/\s+/)
+    .map(term => term.trim())
+    .filter(Boolean);
 
-    const blocks = {};
-    let currentKey = null;
+  const blocks = {};
+  let currentKey = null;
 
-    result.split('\n').forEach((line) => {
-      const trimmed = line.trim();
-      if (!trimmed) return;
+  result.split('\n').forEach(line => {
+    const trimmed = line.trim();
+    if (!trimmed) return;
 
-      if (trimmed.endsWith(':')) {
-        currentKey = trimmed.replace(':', '');
-        blocks[currentKey] = [];
-      } else if (currentKey) {
-        const hasSymbol = trimmed.startsWith('🔴') || trimmed.startsWith('🟢');
-        const symbol = hasSymbol ? trimmed.slice(0, 2) : '🔴';
-        const content = hasSymbol ? trimmed.slice(2).trim() : trimmed;
+    if (trimmed.endsWith(':')) {
+      currentKey = trimmed.replace(':', '');
+      blocks[currentKey] = [];
+    } else if (currentKey) {
+      const hasSymbol = trimmed.startsWith('🔴') || trimmed.startsWith('🟢');
+      const symbol = hasSymbol ? trimmed.slice(0, 2) : '🔴';
+      const content = hasSymbol ? trimmed.slice(2).trim() : trimmed;
 
-        const isMatched = terms.some((term) => content.includes(term));
-        const lineWithStatus = `${isMatched ? '🟢' : symbol} ${content}`;
-        blocks[currentKey].push(lineWithStatus);
-      }
-    });
+      const contentWords = content.split(/\s+/);
+      const isMatched = terms.some(term => contentWords.some(word => word === term));
+      const lineWithStatus = `${isMatched ? '🟢' : symbol} ${content}`;
+      blocks[currentKey].push(lineWithStatus);
+    }
+  });
+
+  // متابعة باقي الدالة...
+};
 
     const orderedKeys = ['al_raqqa', 'al_tabaqa', 'kobani'];
     const finalResult = [];
