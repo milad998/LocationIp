@@ -179,26 +179,46 @@ export default function SearchIps() {
   };
 
   const getDisplayResult = () => {
-    if (!result) return [];
+  if (!result) return [];
 
-    const terms = searchTerm
-      .split(/\s+/)
-      .map((term) => term.trim())
-      .filter(Boolean);
+  const terms = searchTerm
+    .split(/\s+/)
+    .map((term) => term.trim())
+    .filter(Boolean);
 
-    return result.split('\n').map((line) => {
-      const trimmed = line.trim();
-      if (!trimmed) return '';
-      if (trimmed.endsWith(':')) return trimmed;
+  const blocks = {};
+  let currentKey = null;
 
+  result.split('\n').forEach((line) => {
+    const trimmed = line.trim();
+    if (!trimmed) return;
+
+    if (trimmed.endsWith(':')) {
+      currentKey = trimmed.replace(':', '');
+      blocks[currentKey] = [];
+    } else if (currentKey) {
       const hasSymbol = trimmed.startsWith('🔴') || trimmed.startsWith('🟢');
-      const symbol = hasSymbol ? trimmed.slice(0, 2) : '';
+      const symbol = hasSymbol ? trimmed.slice(0, 2) : '🔴';
       const content = hasSymbol ? trimmed.slice(2).trim() : trimmed;
 
       const isMatched = terms.some((term) => content.includes(term));
-      return `${isMatched ? '🟢' : symbol || '🔴'} ${content}`;
-    });
-  };
+      const lineWithStatus = `${isMatched ? '🟢' : symbol} ${content}`;
+      blocks[currentKey].push(lineWithStatus);
+    }
+  });
+
+  const orderedKeys = ['al_raqqa', 'al_tabaqa', 'kobani'];
+  const finalResult = [];
+
+  for (const key of orderedKeys) {
+    if (blocks[key]) {
+      finalResult.push(`${key}:`);
+      finalResult.push(...blocks[key]);
+    }
+  }
+
+  return finalResult;
+};
 
   useEffect(() => {
     if (!searchTerm.trim()) {
