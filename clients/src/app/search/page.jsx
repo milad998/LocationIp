@@ -70,42 +70,23 @@ export default function SearchIps() {
     setHighlightIndex(-1);
   };
 
-/*  const handleSuggestionClick = (entry) => {
-    const tokens = ips.trim().split(/\s+/);
-    tokens.pop();
-    tokens.push(entry.ip);
-    const newIps = tokens.join(' ') + ' ';
-    setIps(newIps);
-    updateSuggestions(newIps);
+  const handleSuggestionClick = (ip) => {
+    const input = textareaRef.current;
+    if (!input) return;
+
+    const parts = input.value.trim().split(/\s+/);
+    parts.pop();
+    parts.push(ip);
+    const newValue = parts.join(' ') + ' ';
+
+    input.value = newValue;
+    input.setSelectionRange(newValue.length - ip.length - 1, newValue.length - 1);
+    input.focus();
+
+    setIps(newValue);
     setSuggestions([]);
     setHighlightIndex(-1);
-    setTimeout(() => {
-      textareaRef.current?.focus();
-    }, 0);
-  };*/
-  const handleSuggestionClick = (ip: string) => {
-  const input = inputRef.current;
-  if (!input) return;
-
-  // احصل على النص الحالي وقسمه
-  const parts = input.value.trim().split(/\s+/);
-  // إزالة الكلمة الأخيرة (التي يتم استبدالها الآن)
-  parts.pop();
-  // أضف IP جديد
-  parts.push(ip);
-  const newValue = parts.join(' ') + ' '; // أضف مسافة بعد الإدخال
-
-  // حدث القيمة في الحقل
-  input.value = newValue;
-
-  // حدد الـ IP الجديد
-  const start = newValue.length - ip.length - 1;
-  const end = newValue.length - 1;
-  input.setSelectionRange(start, end);
-  input.focus();
-
-  setShowSuggestions(false);
-};
+  };
 
   const handleKeyDown = (e) => {
     if (suggestions.length === 0) return;
@@ -119,28 +100,27 @@ export default function SearchIps() {
       );
     } else if (e.key === 'Enter' && highlightIndex >= 0) {
       e.preventDefault();
-      handleSuggestionClick(suggestions[highlightIndex]);
+      handleSuggestionClick(suggestions[highlightIndex].ip);
     }
   };
 
   const handleSearchKeyDown = (e) => {
-  if (searchSuggestions.length === 0) return;
-
-  if (e.key === 'ArrowDown') {
-    e.preventDefault();
-    setHighlightSearchIndex((prev) => (prev + 1) % searchSuggestions.length);
-  } else if (e.key === 'ArrowUp') {
-    e.preventDefault();
-    setHighlightSearchIndex((prev) =>
-      prev <= 0 ? searchSuggestions.length - 1 : prev - 1
-    );
-  } else if (e.key === 'Enter' && highlightSearchIndex >= 0) {
-    e.preventDefault();
-    const chosen = searchSuggestions[highlightSearchIndex];
-    setSearchTerm((prev) => (prev + ' ' + chosen).trim());
-    setSearchSuggestions([]);
-  }
-};
+    if (searchSuggestions.length === 0) return;
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setHighlightSearchIndex((prev) => (prev + 1) % searchSuggestions.length);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setHighlightSearchIndex((prev) =>
+        prev <= 0 ? searchSuggestions.length - 1 : prev - 1
+      );
+    } else if (e.key === 'Enter' && highlightSearchIndex >= 0) {
+      e.preventDefault();
+      const chosen = searchSuggestions[highlightSearchIndex];
+      setSearchTerm((prev) => (prev + ' ' + chosen).trim());
+      setSearchSuggestions([]);
+    }
+  };
 
   const handleClear = () => {
     setIps('');
@@ -198,66 +178,45 @@ export default function SearchIps() {
     navigator.clipboard.writeText(formatResultForWhatsapp());
   };
 
-  /*const getDisplayResult = () => {
-  if (!result) return [];
-  const terms = searchTerm
-    .split(/\s+/)
-    .map((term) => term.toLowerCase().trim())
-    .filter(Boolean);
-
-  return result.split('\n').map((line) => {
-    const trimmed = line.trim();
-    if (!trimmed) return '';
-    if (trimmed.endsWith(':')) return trimmed;
-
-    const hasSymbol = trimmed.startsWith('🔴') || trimmed.startsWith('🟢');
-    const symbol = hasSymbol ? trimmed.slice(0, 2) : '';
-    const content = hasSymbol ? trimmed.slice(2).trim() : trimmed;
-
-    const isMatched = terms.some((term) => content.toLowerCase().includes(term));
-    return `${isMatched ? '🟢' : symbol || '🔴'} ${content}`;
-  });
-};*/
   const getDisplayResult = () => {
-  if (!result) return [];
+    if (!result) return [];
 
-  const terms = searchTerm
-    .split(/\s+/)
-    .map((term) => term.trim())
-    .filter(Boolean);
+    const terms = searchTerm
+      .split(/\s+/)
+      .map((term) => term.trim())
+      .filter(Boolean);
 
-  return result.split('\n').map((line) => {
-    const trimmed = line.trim();
-    if (!trimmed) return '';
-    if (trimmed.endsWith(':')) return trimmed;
+    return result.split('\n').map((line) => {
+      const trimmed = line.trim();
+      if (!trimmed) return '';
+      if (trimmed.endsWith(':')) return trimmed;
 
-    const hasSymbol = trimmed.startsWith('🔴') || trimmed.startsWith('🟢');
-    const symbol = hasSymbol ? trimmed.slice(0, 2) : '';
-    const content = hasSymbol ? trimmed.slice(2).trim() : trimmed;
+      const hasSymbol = trimmed.startsWith('🔴') || trimmed.startsWith('🟢');
+      const symbol = hasSymbol ? trimmed.slice(0, 2) : '';
+      const content = hasSymbol ? trimmed.slice(2).trim() : trimmed;
 
-    const isMatched = terms.some((term) => content.includes(term));
-    return `${isMatched ? '🟢' : symbol || '🔴'} ${content}`;
-  });
-};
+      const isMatched = terms.some((term) => content.includes(term));
+      return `${isMatched ? '🟢' : symbol || '🔴'} ${content}`;
+    });
+  };
 
   useEffect(() => {
-  if (!searchTerm.trim()) {
-    setSearchSuggestions([]);
-    return;
-  }
-  const term = searchTerm.toLowerCase();
+    if (!searchTerm.trim()) {
+      setSearchSuggestions([]);
+      return;
+    }
+    const term = searchTerm.toLowerCase();
 
-  const lines = result.split('\n').filter(line => {
-    const trimmed = line.trim();
-    const isIP = /^\d{1,3}(\.\d{1,3}){3}$/.test(trimmed); // يتحقق هل السطر هو IP
-    return trimmed && !trimmed.endsWith(':') && !isIP && trimmed.toLowerCase().includes(term);
-  });
+    const lines = result.split('\n').filter(line => {
+      const trimmed = line.trim();
+      const isIP = /^\d{1,3}(\.\d{1,3}){3}$/.test(trimmed);
+      return trimmed && !trimmed.endsWith(':') && !isIP && trimmed.toLowerCase().includes(term);
+    });
 
-  const uniqueLines = Array.from(new Set(lines)).slice(0, 10);
-  setSearchSuggestions(uniqueLines);
-  setHighlightSearchIndex(-1);
-}, [searchTerm, result]);
-
+    const uniqueLines = Array.from(new Set(lines)).slice(0, 10);
+    setSearchSuggestions(uniqueLines);
+    setHighlightSearchIndex(-1);
+  }, [searchTerm, result]);
 
   return (
     <div className="container d-flex align-items-center justify-content-center min-vh-100 bg-light">
@@ -307,7 +266,7 @@ export default function SearchIps() {
                       idx === highlightIndex ? 'active' : ''
                     }`}
                     style={{ cursor: 'pointer' }}
-                    onClick={() => handleSuggestionClick(entry)}
+                    onClick={() => handleSuggestionClick(entry.ip)}
                   >
                     <span>{entry.name}</span>
                     <span className="text-muted small">{entry.ip}</span>
