@@ -75,7 +75,7 @@ return encodeURIComponent(whatsappText.trim());
 
 const handleCopy = () => { if (!result) return; navigator.clipboard.writeText(result); };
 
-const handleWhatsappShare = () => { const text = formatResultForWhatsapp(); if (text) { window.open("https://wa.me/?text=${text}", '_blank'); } };
+const handleWhatsappShare = () => { const text = formatResultForWhatsapp(); if (text) { window.open(`https://wa.me/?text=${text}`, '_blank'); } };
 
 const getDisplayResult = () => { if (!result) return [];
 
