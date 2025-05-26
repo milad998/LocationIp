@@ -5,7 +5,12 @@ import {Search,Loader2,CheckCircle,AlertCircle,X,Clipboard,} from 'lucide-react'
 import IpInput from '../../Components/IpInput';
 import SearchBox from '../../Components/SearchBox';
 import ResultsDisplay from '../../Components/ResultsDisplay';
-
+import {
+  handleInputChange,
+  handleClear,
+  handleSearch,
+  handleSuggestionClick,
+} from '../../utils/Handlers';
 const CITY_MAP = {
   al_raqqa: 'الرقة',
   al_tabaqa: 'الطبقة',
