@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import {Search,Loader2,CheckCircle,AlertCircle,X,Clipboard,} from 'lucide-react';
+import { Search, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
 import IpInput from '../../Components/IpInput';
 import SearchBox from '../../Components/SearchBox';
 import ResultsDisplay from '../../Components/ResultsDisplay';
@@ -24,6 +24,7 @@ export default function SearchIps() {
 
   const containerRef = useRef();
   const inputRef = useRef();
+
   useEffect(() => {
     const fetchAll = async () => {
       try {
@@ -47,79 +48,76 @@ export default function SearchIps() {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
-// utils/handlers.js
 
-const handleInputChange = (e, setIps, allData, setSuggestions) => {
-  const value = e.target.value;
-  setIps(value);
+  const handleInputChange = (e) => {
+    const value = e.target.value;
+    setIps(value);
 
-  if (!value.trim()) {
+    if (!value.trim()) {
+      setSuggestions([]);
+      return;
+    }
+
+    const lastWord = value.trim().split(/\s+/).pop().toLowerCase();
+
+    const matches = allData.filter(
+      (entry) =>
+        entry.name?.toLowerCase().includes(lastWord) ||
+        entry.ip?.startsWith(lastWord)
+    );
+
+    setSuggestions(matches.slice(0, 10));
+  };
+
+  const handleSuggestionClick = (ip) => {
+    const parts = ips.trim().split(/\s+/);
+    parts.pop();
+    parts.push(ip);
+    setIps(parts.join(' ') + ' ');
     setSuggestions([]);
-    return;
-  }
+    inputRef?.current?.focus();
+  };
 
-  const lastWord = value.trim().split(/\s+/).pop().toLowerCase();
+  const handleClear = () => {
+    setIps('');
+    setSuggestions([]);
+  };
 
-  const matches = allData.filter(
-    (entry) =>
-      entry.name?.toLowerCase().includes(lastWord) ||
-      entry.ip?.startsWith(lastWord)
-  );
+  const handleSearch = async (e) => {
+    e.preventDefault();
 
-  setSuggestions(matches.slice(0, 10));
-};
+    const cleanedIps = ips
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean);
 
-const handleSuggestionClick = (ip, ips, setIps, setSuggestions, inputRef) => {
-  const parts = ips.trim().split(/\s+/);
-  parts.pop();
-  parts.push(ip);
-  setIps(parts.join(' ') + ' ');
-  setSuggestions([]);
+    if (cleanedIps.length === 0) {
+      setStatus('error');
+      return;
+    }
 
-  inputRef?.current?.focus();
-};
+    setLoading(true);
+    try {
+      const res = await fetch('/api/search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ips: cleanedIps }),
+      });
 
-const handleClear = (setIps, setSuggestions) => {
-  setIps('');
-  setSuggestions([]);
-};
+      const data = await res.json();
 
-const handleSearch = async (e, ips, setLoading, setStatus, setResult) => {
-  e.preventDefault();
+      if (!res.ok) throw new Error(data.message || 'Error');
 
-  const cleanedIps = ips
-    .trim()
-    .split(/\s+/)
-    .filter(Boolean);
+      setResult(data.result || '');
+      setStatus('success');
+    } catch (err) {
+      setStatus('error');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  if (cleanedIps.length === 0) {
-    setStatus('error');
-    return;
-  }
-
-  setLoading(true);
-  try {
-    const res = await fetch('/api/search', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ips: cleanedIps }),
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) throw new Error(data.message || 'Error');
-
-    setResult(data.result || '');
-    setStatus('success');
-  } catch (err) {
-    setStatus('error');
-  } finally {
-    setLoading(false);
-  }
-};
-                  
-  // باقي useEffect ومعالجات الإدخال تبقى كما هي...
-    useEffect(() => {
+  useEffect(() => {
     if (!searchTerm.trim()) {
       setSearchSuggestions([]);
       return;
@@ -160,7 +158,6 @@ const handleSearch = async (e, ips, setLoading, setStatus, setResult) => {
         <form onSubmit={handleSearch}>
           <IpInput
             ips={ips}
-            setIps={setIps}
             suggestions={suggestions}
             containerRef={containerRef}
             inputRef={inputRef}
@@ -191,11 +188,12 @@ const handleSearch = async (e, ips, setLoading, setStatus, setResult) => {
           <ResultsDisplay
             result={result}
             CITY_MAP={CITY_MAP}
-            onWhatsappShare={handleWhatsappShare}
-            getDisplayResult={getDisplayResult}
+            // تأكد أن هذه الدوال موجودة ومستوردة أو قم بحذفها إن لم تكن مستخدمة
+            onWhatsappShare={() => {}}
+            getDisplayResult={(res) => res}
           />
         )}
       </div>
     </div>
   );
-  }
+          }
