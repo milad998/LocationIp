@@ -88,7 +88,6 @@ const formatResultForWhatsapp = () => {
   return encodeURIComponent(whatsappText.trim());
 };
 
-const handleCopy = () => { if (!result) return; navigator.clipboard.writeText(result); };
 
 const handleWhatsappShare = () => { const text = formatResultForWhatsapp(); if (text) { window.open(`https://wa.me/?text=${text}`, '_blank'); } };
 
@@ -260,12 +259,7 @@ return ( <div className="container d-flex align-items-center justify-content-cen
         <div className="d-flex justify-content-between align-items-center mb-2">
           <h2 className="h6 mb-0">النتائج:</h2>
           <div className="d-flex gap-2">
-            <button
-              onClick={handleCopy}
-              className="btn btn-light btn-sm d-flex align-items-center gap-1"
-            >
-              <Clipboard size={16} /> نسخ
-            </button>
+            
             <button
               onClick={handleWhatsappShare}
               className="btn btn-success btn-sm d-flex align-items-center gap-1"
