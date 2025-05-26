@@ -1,10 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { Search, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
-import IpInput from '../../Components/IpInput';
-import SearchBox from '../../Components/SearchBox';
-import ResultsDisplay from '../../Components/ResultsDisplay';
+import { Search, Loader2, CheckCircle, AlertCircle, X, Clipboard } from 'lucide-react';
 
 const CITY_MAP = {
   al_raqqa: 'الرقة',
@@ -105,7 +102,6 @@ export default function SearchIps() {
       });
 
       const data = await res.json();
-
       if (!res.ok) throw new Error(data.message || 'Error');
 
       setResult(data.result || '');
@@ -115,6 +111,20 @@ export default function SearchIps() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const getDisplayResult = () => {
+    return result ? result.split('\n') : [];
+  };
+
+  const formatResultForWhatsapp = () => {
+    return getDisplayResult().join('\n');
+  };
+
+  const handleWhatsappShare = () => {
+    const message = encodeURIComponent(formatResultForWhatsapp());
+    const whatsappUrl = `https://wa.me/?text=${message}`;
+    window.open(whatsappUrl, '_blank');
   };
 
   useEffect(() => {
@@ -156,21 +166,75 @@ export default function SearchIps() {
         )}
 
         <form onSubmit={handleSearch}>
-          <IpInput
-            ips={ips}
-            suggestions={suggestions}
-            containerRef={containerRef}
-            inputRef={inputRef}
-            onClear={handleClear}
-            onSuggestionClick={handleSuggestionClick}
-            onChange={handleInputChange}
-          />
+          <div className="mb-3 position-relative" ref={containerRef}>
+            <label className="form-label">أدخل عناوين IP مفصولة بمسافات أو كلمات</label>
+            <div className="position-relative">
+              <input
+                className="form-control"
+                type="text"
+                placeholder="اكتب جزء من الاسم أو IP وسيظهر اقتراح"
+                value={ips}
+                onChange={handleInputChange}
+                ref={inputRef}
+              />
+              {ips && (
+                <X
+                  size={18}
+                  className="position-absolute top-0 end-0 mt-2 me-2 text-danger"
+                  style={{ cursor: 'pointer' }}
+                  onClick={handleClear}
+                />
+              )}
+            </div>
 
-          <SearchBox
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            searchSuggestions={searchSuggestions}
-          />
+            {suggestions.length > 0 && (
+              <ul className="list-group position-absolute w-100 z-3" style={{ top: '100%', left: 0 }}>
+                {suggestions.map((entry, idx) => (
+                  <li
+                    key={idx}
+                    style={{ cursor: 'pointer' }}
+                    className="list-group-item d-flex justify-content-between"
+                    onClick={() => handleSuggestionClick(entry.ip)}
+                  >
+                    <span>{entry.name}</span>
+                    <span className="text-muted small">{entry.ip}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          <div className="mb-3 position-relative">
+            <label className="form-label">بحث في النتائج</label>
+            <input
+              className="form-control"
+              type="text"
+              placeholder="ابحث عن IP أو اسم لتغيير 🔴 إلى 🟢"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            {searchSuggestions.length > 0 && (
+              <ul className="list-group position-absolute w-100 z-3" style={{ top: '100%', left: 0 }}>
+                {searchSuggestions.map((s, idx) => (
+                  <li
+                    key={idx}
+                    style={{ cursor: 'pointer' }}
+                    className="list-group-item"
+                    onClick={() => {
+                      const parts = searchTerm.trim().split(/\s+/);
+                      parts.pop();
+                      parts.push(s);
+                      const updated = parts.join(' ') + ' ';
+                      setSearchTerm(updated);
+                      setSearchSuggestions([]);
+                    }}
+                  >
+                    {s}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
 
           <button
             type="submit"
@@ -185,15 +249,41 @@ export default function SearchIps() {
         </form>
 
         {result && (
-          <ResultsDisplay
-            result={result}
-            CITY_MAP={CITY_MAP}
-            // تأكد أن هذه الدوال موجودة ومستوردة أو قم بحذفها إن لم تكن مستخدمة
-            onWhatsappShare={() => {}}
-            getDisplayResult={(res) => res}
-          />
+          <div className="mt-4">
+            <div className="d-flex justify-content-between align-items-center mb-2">
+              <h2 className="h6 mb-0">النتائج:</h2>
+              <div className="d-flex gap-2">
+                <button
+                  onClick={handleWhatsappShare}
+                  className="btn btn-success btn-sm d-flex align-items-center gap-1"
+                >
+                  <Clipboard size={16} /> واتساب
+                </button>
+              </div>
+            </div>
+            <div className="bg-light border rounded p-3 text-muted small overflow-auto" style={{ maxHeight: '300px' }}>
+              {getDisplayResult().map((line, idx) => {
+                const isTitle = line.trim().endsWith(':');
+                const symbol = line.startsWith('🟢') ? '🟢' : line.startsWith('🔴') ? '🔴' : null;
+                const content = symbol ? line.slice(2).trim() : line;
+
+                return (
+                  <div key={idx} className="d-flex align-items-start mb-1">
+                    {isTitle ? (
+                      <span className="fw-bold">{CITY_MAP[content.replace(':', '').trim()] || content}</span>
+                    ) : (
+                      <>
+                        {symbol && <span className="me-2">{symbol}</span>}
+                        <span>{content}</span>
+                      </>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         )}
       </div>
     </div>
   );
-          }
+      }
