@@ -5,12 +5,7 @@ import {Search,Loader2,CheckCircle,AlertCircle,X,Clipboard,} from 'lucide-react'
 import IpInput from '../../Components/IpInput';
 import SearchBox from '../../Components/SearchBox';
 import ResultsDisplay from '../../Components/ResultsDisplay';
-import {
-  handleInputChange,
-  handleClear,
-  handleSearch,
-  handleSuggestionClick,
-} from '../../utils/Handlers';
+
 const CITY_MAP = {
   al_raqqa: 'الرقة',
   al_tabaqa: 'الطبقة',
@@ -52,7 +47,76 @@ export default function SearchIps() {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+// utils/handlers.js
 
+const handleInputChange = (e, setIps, allData, setSuggestions) => {
+  const value = e.target.value;
+  setIps(value);
+
+  if (!value.trim()) {
+    setSuggestions([]);
+    return;
+  }
+
+  const lastWord = value.trim().split(/\s+/).pop().toLowerCase();
+
+  const matches = allData.filter(
+    (entry) =>
+      entry.name?.toLowerCase().includes(lastWord) ||
+      entry.ip?.startsWith(lastWord)
+  );
+
+  setSuggestions(matches.slice(0, 10));
+};
+
+const handleSuggestionClick = (ip, ips, setIps, setSuggestions, inputRef) => {
+  const parts = ips.trim().split(/\s+/);
+  parts.pop();
+  parts.push(ip);
+  setIps(parts.join(' ') + ' ');
+  setSuggestions([]);
+
+  inputRef?.current?.focus();
+};
+
+const handleClear = (setIps, setSuggestions) => {
+  setIps('');
+  setSuggestions([]);
+};
+
+const handleSearch = async (e, ips, setLoading, setStatus, setResult) => {
+  e.preventDefault();
+
+  const cleanedIps = ips
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+
+  if (cleanedIps.length === 0) {
+    setStatus('error');
+    return;
+  }
+
+  setLoading(true);
+  try {
+    const res = await fetch('/api/search', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ips: cleanedIps }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) throw new Error(data.message || 'Error');
+
+    setResult(data.result || '');
+    setStatus('success');
+  } catch (err) {
+    setStatus('error');
+  } finally {
+    setLoading(false);
+  }
+};
                   
   // باقي useEffect ومعالجات الإدخال تبقى كما هي...
     useEffect(() => {
