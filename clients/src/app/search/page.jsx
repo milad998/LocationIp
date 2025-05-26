@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'; import { Search, Loader2, C
 
 const CITY_MAP = { al_raqqa: 'الرقة', al_tabaqa: 'الطبقة', kobani: 'كوباني', };
 
-export default function SearchIps() { const [ips, setIps] = useState(''); const [result, setResult] = useState(''); const [status, setStatus] = useState(null); const [loading, setLoading] = useState(false); const [suggestions, setSuggestions] = useState([]); const [allData, setAllData] = useState([]); const [highlightIndex, setHighlightIndex] = useState(-1); const [searchTerm, setSearchTerm] = useState(''); const [searchSuggestions, setSearchSuggestions] = useState([]); const [highlightSearchIndex, setHighlightSearchIndex] = useState(-1);
+export default function SearchIps() { const [ips, setIps] = useState(''); const [result, setResult] = useState(''); const [status, setStatus] = useState(null); const [loading, setLoading] = useState(false); const [suggestions, setSuggestions] = useState([]); const [allData, setAllData] = useState([]);  const [searchTerm, setSearchTerm] = useState(''); const [searchSuggestions, setSearchSuggestions] = useState([]); 
 
 const containerRef = useRef(); const inputRef = useRef();
 
@@ -33,9 +33,7 @@ setHighlightIndex(-1);
 
 };
 
-const handleKeyDown = (e) => { if (suggestions.length === 0) return; if (e.key === 'ArrowDown') { e.preventDefault(); setHighlightIndex((prev) => (prev + 1) % suggestions.length); } else if (e.key === 'ArrowUp') { e.preventDefault(); setHighlightIndex((prev) => (prev <= 0 ? suggestions.length - 1 : prev - 1)); } else if (e.key === 'Enter' && highlightIndex >= 0) { e.preventDefault(); handleSuggestionClick(suggestions[highlightIndex].ip); } };
 
-const handleSearchKeyDown = (e) => { if (searchSuggestions.length === 0) return; if (e.key === 'ArrowDown') { e.preventDefault(); setHighlightSearchIndex((prev) => (prev + 1) % searchSuggestions.length); } else if (e.key === 'ArrowUp') { e.preventDefault(); setHighlightSearchIndex((prev) => prev <= 0 ? searchSuggestions.length - 1 : prev - 1 ); } else if (e.key === 'Enter' && highlightSearchIndex >= 0) { e.preventDefault(); const chosen = searchSuggestions[highlightSearchIndex]; setSearchTerm((prev) => (prev + ' ' + chosen).trim()); setSearchSuggestions([]); } };
 
 const handleClear = () => { setIps(''); setSuggestions([]); setResult(''); setStatus(null); setSearchTerm(''); setSearchSuggestions([]); };
 
@@ -175,7 +173,7 @@ return ( <div className="container d-flex align-items-center justify-content-cen
             placeholder="اكتب جزء من الاسم أو IP وسيظهر اقتراح"
             value={ips}
             onChange={handleInputChange}
-            onKeyDown={handleKeyDown}
+            
             ref={inputRef}
           />
           {ips && (
@@ -193,9 +191,7 @@ return ( <div className="container d-flex align-items-center justify-content-cen
             {suggestions.map((entry, idx) => (
               <li
                 key={idx}
-                className={`list-group-item list-group-item-action d-flex justify-content-between ${
-                  idx === highlightIndex ? 'active' : ''
-                }`}
+                
                 style={{ cursor: 'pointer' }}
                 onClick={() => handleSuggestionClick(entry.ip)}
               >
@@ -215,16 +211,13 @@ return ( <div className="container d-flex align-items-center justify-content-cen
           placeholder="ابحث عن IP أو اسم لتغيير 🔴 إلى 🟢"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          onKeyDown={handleSearchKeyDown}
+          
         />
         {searchSuggestions.length > 0 && (
           <ul className="list-group position-absolute w-100 z-3" style={{ top: '100%', left: 0 }}>
             {searchSuggestions.map((s, idx) => (
               <li
                 key={idx}
-                className={`list-group-item list-group-item-action ${
-                  idx === highlightSearchIndex ? 'active' : ''
-                }`}
                 style={{ cursor: 'pointer' }}
                 onClick={() => {
                   const parts = searchTerm.trim().split(/\s+/);
