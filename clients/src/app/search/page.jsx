@@ -41,36 +41,51 @@ const handleClear = () => { setIps(''); setSuggestions([]); setResult(''); setSt
 
 const handleSearch = async (e) => { e.preventDefault(); setLoading(true); setStatus(null); setResult(''); try { const ipList = ips.trim().split(/\s+/); const res = await fetch('http://localhost:8000/api/locations/search/ips', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ips: ipList }), }); const text = await res.text(); setResult(text); setStatus(res.ok ? 'success' : 'error'); } catch (err) { setResult('حدث خطأ في الاتصال بالسيرفر.'); setStatus('error'); } finally { setLoading(false); } };
 
-const formatResultForWhatsapp = () => { if (!result) return '';
+const formatResultForWhatsapp = () => {
+  if (!result) return '';
 
-const lines = result.split('\n');
-const grouped = {};
-let currentKey = '';
+  const searchWords = searchTerm.toLowerCase().split(/\s+/).filter(Boolean);
+  const lines = result.split('\n');
+  const grouped = {};
+  let currentKey = '';
 
-for (const line of lines) {
-  if (line.trim().endsWith(':')) {
-    currentKey = line.replace(':', '').trim();
-    grouped[currentKey] = [];
-  } else if (line.trim() && currentKey) {
-    grouped[currentKey].push(line.trim());
-  }
-}
+  for (const line of lines) {
+    if (line.trim().endsWith(':')) {
+      currentKey = line.replace(':', '').trim();
+      grouped[currentKey] = [];
+    } else if (line.trim() && currentKey) {
+      let content = line.trim();
+      let symbol = '🔴';
 
-const order = ['al_raqqa', 'al_tabaqa', 'kobani'];
+      // اكتشف إن كانت تحتوي على رمز مسبق
+      if (content.startsWith('🔴') || content.startsWith('🟢')) {
+        symbol = content.slice(0, 2);
+        content = content.slice(2).trim();
+      }
 
-let whatsappText = 'وضع المسار:\n';
-for (const key of order) {
-  if (grouped[key]?.length) {
-    const arabicName = CITY_MAP[key] || key;
-    whatsappText += `*${arabicName}*:\n`;
-    for (const item of grouped[key]) {
-      whatsappText += `🔴 ${item}\n`;
+      const isMatch = searchWords.some((word) =>
+        content.toLowerCase().includes(word)
+      );
+
+      const finalSymbol = isMatch ? '🟢' : symbol;
+      grouped[currentKey].push(`${finalSymbol} ${content}`);
     }
   }
-}
 
-return encodeURIComponent(whatsappText.trim());
+  const order = ['al_raqqa', 'al_tabaqa', 'kobani'];
+  let whatsappText = 'وضع المسار:\n';
 
+  for (const key of order) {
+    if (grouped[key]?.length) {
+      const arabicName = CITY_MAP[key] || key;
+      whatsappText += `*${arabicName}*:\n`;
+      for (const item of grouped[key]) {
+        whatsappText += `${item}\n`;
+      }
+    }
+  }
+
+  return encodeURIComponent(whatsappText.trim());
 };
 
 const handleCopy = () => { if (!result) return; navigator.clipboard.writeText(result); };
