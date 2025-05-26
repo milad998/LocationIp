@@ -164,8 +164,10 @@ export default function SearchIps() {
       if (line.trim().endsWith(':')) {
         currentKey = line.replace(':', '').trim();
         grouped[currentKey] = [];
+        window.open('https://wa.me/', '_blank');
       } else if (line.trim() && currentKey) {
         grouped[currentKey].push(line.trim());
+        window.open('https://wa.me/', '_blank');
       }
     }
 
