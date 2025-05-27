@@ -28,12 +28,10 @@ export default function SearchIps() {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchSuggestions, setSearchSuggestions] = useState([]);
 
-  
   const containerRef = useRef();
   const inputRef = useRef();
   const inputTowRef = useRef();
-  
-  // جلب كل البيانات عند بداية التحميل
+
   useEffect(() => {
     const fetchAll = async () => {
       try {
@@ -47,21 +45,17 @@ export default function SearchIps() {
     fetchAll();
   }, []);
 
-  // إغلاق القوائم عند النقر خارج المكون
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (containerRef.current && !containerRef.current.contains(e.target)) {
         setSuggestions([]);
-        
         setSearchSuggestions([]);
-        
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // تحديث اقتراحات الإدخال حسب آخر كلمة في ips
   const updateSuggestions = (value) => {
     const lastWord = value.trim().split(/\s+/).pop()?.toLowerCase();
     if (!lastWord) {
@@ -74,7 +68,6 @@ export default function SearchIps() {
         entry.ip?.startsWith(lastWord)
     );
     setSuggestions(matches.slice(0, 10));
-    
   };
 
   const handleInputChange = (e) => {
@@ -85,37 +78,30 @@ export default function SearchIps() {
 
   const handleSuggestionClick = (ip) => {
     if (!inputRef.current) return;
-
     const parts = inputRef.current.value.trim().split(/\s+/);
     parts.pop();
     parts.push(ip);
     const newValue = parts.join(' ') + ' ';
-
     inputRef.current.value = newValue;
     inputRef.current.setSelectionRange(newValue.length, newValue.length);
     inputRef.current.focus();
-
     setIps(newValue);
     setSuggestions([]);
-    
   };
-  const handleSuggestionClickTow = (ip) => {
-    if (!inputTowRef.current) return;
 
+  const handleSuggestionClickTow = (name) => {
+    if (!inputTowRef.current) return;
     const parts = inputTowRef.current.value.trim().split(/\s+/);
     parts.pop();
-    parts.push(ip);
+    parts.push(name);
     const newValue = parts.join(' ') + ' ';
-
     inputTowRef.current.value = newValue;
     inputTowRef.current.setSelectionRange(newValue.length, newValue.length);
     inputTowRef.current.focus();
-
-    setIps(newValue);
-    setSuggestions([]);
-    
+    setSearchTerm(newValue);
+    setSearchSuggestions([]);
   };
-  // تفريغ جميع الحقول والنتائج
+
   const handleClear = () => {
     setIps('');
     setSuggestions([]);
@@ -123,9 +109,10 @@ export default function SearchIps() {
     setStatus(null);
     setSearchTerm('');
     setSearchSuggestions([]);
+    if (inputRef.current) inputRef.current.value = '';
+    if (inputTowRef.current) inputTowRef.current.value = '';
   };
 
-  // إرسال طلب البحث إلى السيرفر
   const handleSearch = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -149,15 +136,12 @@ export default function SearchIps() {
     }
   };
 
-  // تنسيق النتيجة للواتساب مع تمييز النتائج المتطابقة بـ🟢
   const formatResultForWhatsapp = () => {
     if (!result) return '';
-
     const searchWords = searchTerm.toLowerCase().split(/\s+/).filter(Boolean);
     const lines = result.split('\n');
     const grouped = {};
     let currentKey = '';
-
     for (const line of lines) {
       if (line.trim().endsWith(':')) {
         currentKey = line.replace(':', '').trim();
@@ -165,17 +149,13 @@ export default function SearchIps() {
       } else if (line.trim() && currentKey) {
         let content = line.trim();
         let symbol = '🔴';
-
-        // اكتشف إن كانت تحتوي على رمز مسبق
         if (content.startsWith('🔴') || content.startsWith('🟢')) {
           symbol = content.slice(0, 2);
           content = content.slice(2).trim();
         }
-
         const isMatch = searchWords.some((word) =>
           content.toLowerCase().includes(word)
         );
-
         const finalSymbol = isMatch ? '🟢' : symbol;
         grouped[currentKey].push(`${finalSymbol} ${content}`);
       }
@@ -183,7 +163,6 @@ export default function SearchIps() {
 
     const order = ['al_raqqa', 'al_tabaqa', 'kobani'];
     let whatsappText = 'وضع المسار:\n';
-
     for (const key of order) {
       if (grouped[key]?.length) {
         const arabicName = CITY_MAP[key] || key;
@@ -204,21 +183,17 @@ export default function SearchIps() {
     }
   };
 
-  // تجهيز النص المعروض مع تمييز النتائج
   const getDisplayResult = () => {
     if (!result) return [];
-
     const searchWords = searchTerm.toLowerCase().split(/\s+/).filter(Boolean);
     const ipWords = ips.toLowerCase().split(/\s+/).filter(Boolean);
     const terms = [...new Set([...searchWords, ...ipWords])];
-
     const blocks = {};
     let currentKey = null;
 
     result.split('\n').forEach((line) => {
       const trimmed = line.trim();
       if (!trimmed) return;
-
       if (trimmed.endsWith(':')) {
         currentKey = trimmed.replace(':', '');
         blocks[currentKey] = [];
@@ -226,7 +201,6 @@ export default function SearchIps() {
         const hasSymbol = trimmed.startsWith('🔴') || trimmed.startsWith('🟢');
         const symbol = hasSymbol ? trimmed.slice(0, 2) : '🔴';
         const content = hasSymbol ? trimmed.slice(2).trim() : trimmed;
-
         const isMatched = terms.some((term) =>
           content.toLowerCase().includes(term)
         );
@@ -248,28 +222,23 @@ export default function SearchIps() {
     return finalResult;
   };
 
-  // تحديث اقتراحات البحث في النتائج بناءً على searchTerm
   useEffect(() => {
     if (!searchTerm.trim()) {
       setSearchSuggestions([]);
       return;
     }
-
     const lastWord = searchTerm.trim().split(/\s+/).pop()?.toLowerCase();
     if (!lastWord) {
       setSearchSuggestions([]);
       return;
     }
-
     const matches = allData.filter(
       (entry) =>
         entry.name?.toLowerCase().includes(lastWord) ||
         entry.ip?.startsWith(lastWord)
     );
-
     const suggestions = matches.map((entry) => entry.name).slice(0, 10);
     setSearchSuggestions(suggestions);
-    
   }, [searchTerm, allData]);
 
   return (
@@ -311,16 +280,12 @@ export default function SearchIps() {
             </div>
 
             {suggestions.length > 0 && (
-              <ul
-                className="list-group position-absolute w-100 z-3"
-                style={{ top: '100%', left: 0 }}
-              >
+              <ul className="list-group position-absolute w-100 z-3" style={{ top: '100%', left: 0 }}>
                 {suggestions.map((entry, idx) => (
                   <li
                     key={idx}
                     style={{ cursor: 'pointer' }}
                     onClick={() => handleSuggestionClick(entry.ip)}
-
                     className="list-group-item d-flex justify-content-between align-items-center"
                   >
                     <span>{entry.name}</span>
@@ -338,24 +303,19 @@ export default function SearchIps() {
               type="text"
               placeholder="ابحث عن IP أو اسم لتغيير 🔴 إلى 🟢"
               value={searchTerm}
-              onChange={handleInputChange}
+              onChange={(e) => setSearchTerm(e.target.value)}
               ref={inputTowRef}
-
             />
-             {suggestions.length > 0 && (
-              <ul
-                className="list-group position-absolute w-100 z-3"
-                style={{ top: '100%', left: 0 }}
-              >
-                {suggestions.map((entry, idx) => (
+            {searchSuggestions.length > 0 && (
+              <ul className="list-group position-absolute w-100 z-3" style={{ top: '100%', left: 0 }}>
+                {searchSuggestions.map((name, idx) => (
                   <li
                     key={idx}
                     style={{ cursor: 'pointer' }}
-                    onClick={() => handleSuggestionClickTow(entry.ip)}
-                    className="list-group-item d-flex justify-content-between align-items-center"
+                    onClick={() => handleSuggestionClickTow(name)}
+                    className="list-group-item"
                   >
-                    <span>{entry.name}</span>
-                    <span className="text-muted small">{entry.ip}</span>
+                    {name}
                   </li>
                 ))}
               </ul>
@@ -399,7 +359,6 @@ export default function SearchIps() {
                   ? '🔴'
                   : null;
                 const content = symbol ? line.slice(2).trim() : line;
-
                 return (
                   <div key={idx} className="d-flex align-items-start mb-1">
                     {isTitle ? (
@@ -421,4 +380,4 @@ export default function SearchIps() {
       </div>
     </div>
   );
-                                              }
+    }
