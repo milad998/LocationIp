@@ -337,12 +337,13 @@ export default function SearchIps() {
                     style={{ cursor: 'pointer' }}
                     className="list-group-item"
                     onClick={() => {
-                      const parts = searchTerm.trim().split(/\s+/);
-                      parts.pop();
-                      parts.push(s);
-                      const updated = parts.join(' ') + ' ';
-                      setSearchTerm(updated);
-                      setSearchSuggestions([]);
+  const parts = searchTerm.trim().split(/\s+/);
+  if (parts.length > 0) parts.pop(); // حذف الكلمة الأخيرة
+  parts.push(s); // إضافة الاسم المحدد
+  const updated = parts.join(' ') + ' ';
+  setSearchTerm(updated); // تحديث خانة البحث
+  setSearchSuggestions([]); // إخفاء الاقتراحات
+  inputRef.current?.focus();
                     }}
                   >
                     {s}
