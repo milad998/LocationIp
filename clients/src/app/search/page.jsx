@@ -90,17 +90,28 @@ export default function SearchIps() {
   };
 
   const handleSuggestionClickTow = (name) => {
-    if (!inputTowRef.current) return;
-    const parts = inputTowRef.current.value.trim().split(/\s+/);
-    parts.pop();
-    parts.push(name);
-    const newValue = parts.join(' ') + ' ';
-    inputTowRef.current.value = newValue;
-    inputTowRef.current.setSelectionRange(newValue.length, newValue.length);
-    inputTowRef.current.focus();
-    setSearchTerm(newValue);
-    setSearchSuggestions([]);
-  };
+  if (!inputTowRef.current) return;
+
+  const currentValue = inputTowRef.current.value;
+  const trimmed = currentValue.trimEnd();
+  const parts = trimmed.split(/\s+/);
+
+  let newValue = '';
+
+  if (parts.length === 1 && trimmed === '') {
+    // الحقل فارغ
+    newValue = name + ' ';
+  } else {
+    parts.pop(); // إزالة آخر كلمة
+    newValue = [...parts, name].join(' ') + ' ';
+  }
+
+  inputTowRef.current.value = newValue;
+  inputTowRef.current.setSelectionRange(newValue.length, newValue.length);
+  inputTowRef.current.focus();
+  setSearchTerm(newValue);
+  setSearchSuggestions([]);
+};
 
   const handleClear = () => {
     setIps('');
