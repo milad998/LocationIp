@@ -31,8 +31,7 @@ export default function SearchIps() {
   
   const containerRef = useRef();
   const inputRef = useRef();
-  const inputTowRef = useRef();
-
+  
   // جلب كل البيانات عند بداية التحميل
   useEffect(() => {
     const fetchAll = async () => {
@@ -336,28 +335,14 @@ export default function SearchIps() {
   style={{ cursor: 'pointer' }}
   className="list-group-item"
   onClick={() => {
-    const input = inputTowRef.current;
-    if (!input) return;
-
-    const cursorPos = input.selectionStart || searchTerm.length;
-
-    // اجلب الكلمة قبل المؤشر لتبديلها بالاقتراح
-    const beforeCursor = searchTerm.slice(0, cursorPos);
-    const afterCursor = searchTerm.slice(cursorPos);
-
-    const match = beforeCursor.match(/(.*?)(\S+)?$/);
-    const prefix = match?.[1] ?? '';
-    const newValue = prefix + s + ' ' + afterCursor.trimStart();
-
-    setSearchTerm(newValue);
-    setSearchSuggestions([]);
-
-    setTimeout(() => {
-      const pos = (prefix + s + ' ').length;
-      input.setSelectionRange(pos, pos);
-      input.focus();
-    }, 0);
-  }}
+  const parts = searchTerm.trim().split(/\s+/);
+  if (parts.length > 0) parts.pop(); // حذف الكلمة الأخيرة
+  parts.push(s); // إضافة الاسم المحدد
+  const updated = parts.join(' ') + ' ';
+  setSearchTerm(updated); // تحديث خانة البحث
+  setSearchSuggestions([]); // إخفاء الاقتراحات
+  inputRef.current?.focus();  
+}}
 >
   {s}
 </li>
