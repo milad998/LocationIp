@@ -57,7 +57,7 @@ const insertIntoTabaqa = async (ip, name) => {
 };
 const findNamesByIpsTabaqa = async (ips) => {
   const placeholders = ips.map((_, idx) => `$${idx + 1}`).join(',');
-  const query = `SELECT name FROM tabaqa WHERE ip IN (${placeholders})`;
+  const query = `SELECT name, status FROM tabaqa WHERE ip IN (${placeholders})`;
   const res = await pool.query(query, ips);
   return res.rows;
 };
