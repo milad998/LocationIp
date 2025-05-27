@@ -132,7 +132,7 @@ const findIpsInTablesTabaqa = async (req, res) => {
       result += "وضع المسار:\n";
       for (const row of matches) {
         const statusText = row.status ? 'مرسل' : 'مستقبل';
-        result += `${row.name} - ${statusText}\n`;
+        result += `IP: ${row.ip} | الاسم: ${row.name} | الحالة: ${statusText}\n`;
       }
     }
 
