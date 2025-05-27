@@ -123,27 +123,32 @@ const findIpsInTablesTabaqa = async (req, res) => {
     return res.status(400).json({ error: 'ips يجب أن تكون مصفوفة غير فارغة' });
   }
 
-  
   let result = '';
 
   try {
-    
-      const matches = await model.findNamesByIpsTabaqa(ips);
-      if (matches.length > 0) {
-        result += "وضع المسار :"
-        for (const row of matches) {
-          result += `${row.name}\n`;
-        }
+    const matches = await model.findNamesByIpsTabaqa(ips);
+
+    if (matches.length > 0) {
+      result += "وضع المسار:\n";
+      for (const row of matches) {
+        const statusText = row.status ? 'مرسل' : 'مستقبل';
+        result += `${row.name} - ${statusText}\n`;
       }
-    
+    }
+
     res.send(result || 'لم يتم العثور على أي IP.');
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
+    
+      
 module.exports = {
   addLocation,
   findIpsInTables,
   fetchDevices,
-  deleteDevice
+  deleteDevice,
+  addLocationTabaqa,
+  deleteDeviceTabaqa,
+  findIpsInTablesTabaqa
 };
