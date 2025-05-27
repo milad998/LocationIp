@@ -23,6 +23,12 @@ const createTables = async () => {
         name VARCHAR(100)
       );
     `);
+    await pool.query(`
+            CREATE TABLE IF NOT EXISTS tabaqa (
+            ip VARCHAR(6) UNIQUE,
+            name VARCHAR(25)
+            )
+                     `);
     
   } catch (err) {
     console.error('Error creating tables:', err);
