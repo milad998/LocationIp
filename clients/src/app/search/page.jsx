@@ -90,17 +90,19 @@ export default function SearchIps() {
   };
 
   const handleSuggestionClickTow = (name) => {
-  if (!inputTowRef.current) return;
-
-  const currentValue = inputTowRef.current.value.trimEnd();
+  const currentValue = searchTerm.trimEnd(); // استخدام searchTerm بدلاً من ref مباشرةً
   const newValue = currentValue + (currentValue ? ' ' : '') + name + ' ';
 
-  inputTowRef.current.value = newValue;
-  inputTowRef.current.setSelectionRange(newValue.length, newValue.length);
-  inputTowRef.current.focus();
-
-  setSearchTerm(newValue);
+  setSearchTerm(newValue); // هذا ما يربط القيمة بالحقل فعليًا
   setSearchSuggestions([]);
+  
+  // تأخير بسيط لضمان تركيز المؤشر في النهاية
+  setTimeout(() => {
+    if (inputTowRef.current) {
+      inputTowRef.current.setSelectionRange(newValue.length, newValue.length);
+      inputTowRef.current.focus();
+    }
+  }, 0);
 };
 
   const handleClear = () => {
