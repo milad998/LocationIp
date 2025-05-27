@@ -332,36 +332,35 @@ export default function SearchIps() {
               >
                 {searchSuggestions.map((s, idx) => (
                   <li
-                    key={idx}
-                    style={{ cursor: 'pointer' }}
-                    className="list-group-item"
-                    onClick={() => {
-  const input = inputTowRef.current;
-  if (!input) return;
+  key={idx}
+  style={{ cursor: 'pointer' }}
+  className="list-group-item"
+  onClick={() => {
+    const input = inputTowRef.current;
+    if (!input) return;
 
-  const cursorPos = input.selectionStart || searchTerm.length;
-  const beforeCursor = searchTerm.slice(0, cursorPos);
-  const afterCursor = searchTerm.slice(cursorPos);
+    const cursorPos = input.selectionStart || searchTerm.length;
 
-  const parts = beforeCursor.trim().split(/\s+/);
-  if (parts.length > 0) parts.pop(); // حذف الكلمة الأخيرة
+    // اجلب الكلمة قبل المؤشر لتبديلها بالاقتراح
+    const beforeCursor = searchTerm.slice(0, cursorPos);
+    const afterCursor = searchTerm.slice(cursorPos);
 
-  const newValue = [...parts, s].join(' ') + ' ';
-  const finalValue = newValue + afterCursor.trimStart();
-  
-  setSearchTerm(finalValue);
-  setSearchSuggestions([]);
+    const match = beforeCursor.match(/(.*?)(\S+)?$/);
+    const prefix = match?.[1] ?? '';
+    const newValue = prefix + s + ' ' + afterCursor.trimStart();
 
-  // وضع المؤشر بعد الكلمة الجديدة
-  setTimeout(() => {
-    const pos = newValue.length;
-    input.setSelectionRange(pos, pos);
-    input.focus();
-  }, 0);
-}}
-                  >
-                    {s}
-                  </li>
+    setSearchTerm(newValue);
+    setSearchSuggestions([]);
+
+    setTimeout(() => {
+      const pos = (prefix + s + ' ').length;
+      input.setSelectionRange(pos, pos);
+      input.focus();
+    }, 0);
+  }}
+>
+  {s}
+</li>
                 ))}
               </ul>
             )}
