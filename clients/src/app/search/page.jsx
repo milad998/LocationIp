@@ -31,6 +31,7 @@ export default function SearchIps() {
   
   const containerRef = useRef();
   const inputRef = useRef();
+  const inputTowRef = useRef();
 
   // جلب كل البيانات عند بداية التحميل
   useEffect(() => {
@@ -51,9 +52,9 @@ export default function SearchIps() {
     const handleClickOutside = (e) => {
       if (containerRef.current && !containerRef.current.contains(e.target)) {
         setSuggestions([]);
-        setHighlightIndex(-1);
+        
         setSearchSuggestions([]);
-        setHighlightSearchIndex(-1);
+        
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -321,6 +322,7 @@ export default function SearchIps() {
               type="text"
               placeholder="ابحث عن IP أو اسم لتغيير 🔴 إلى 🟢"
               value={searchTerm}
+              ref={inputTowRef}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
             {searchSuggestions.length > 0 && (
@@ -340,7 +342,7 @@ export default function SearchIps() {
   const updated = parts.join(' ') + ' ';
   setSearchTerm(updated); // تحديث خانة البحث
   setSearchSuggestions([]); // إخفاء الاقتراحات
-  inputRef.current?.focus();
+  inputTowRef.current?.focus();
                     }}
                   >
                     {s}
