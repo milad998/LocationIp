@@ -48,13 +48,32 @@ const deleteDeviceByName = async (name) => {
   }
 };
 
-
-
-
+const insertIntoTabaqa = async (ip, name) => {
+  const res = await pool.query(
+    `INSERT INTO tabaqa (ip, name) VALUES ($1, $2) RETURNING *`,
+    [ip, name]
+  );
+  return res.rows[0];
+};
+const findNamesByIpsTabaqa = async (ips) => {
+  const placeholders = ips.map((_, idx) => `$${idx + 1}`).join(',');
+  const query = `SELECT name FROM tabaqa WHERE ip IN (${placeholders})`;
+  const res = await pool.query(query, ips);
+  return res.rows;
+};
+const deleteDeviceByNameTabaqa = async (name) => {
+  
+  
+    await pool.query(`DELETE FROM tabaqa WHERE name = $1`, [name]);
+  
+};
 module.exports = {
   getAllFromTable,
   insertIntoTable,
   findNamesByIps,
   getAllIPsAndNames,
-  deleteDeviceByName
+  deleteDeviceByName,
+  insertIntoTabaqa,
+  findNamesByIpsTabaqa,
+  deleteDeviceByNameTabaqa
 };
