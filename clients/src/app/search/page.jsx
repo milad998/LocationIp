@@ -31,6 +31,7 @@ export default function SearchIps() {
   
   const containerRef = useRef();
   const inputRef = useRef();
+  const inputTowRef = useRef();
   
   // جلب كل البيانات عند بداية التحميل
   useEffect(() => {
@@ -98,7 +99,22 @@ export default function SearchIps() {
     setSuggestions([]);
     
   };
+  const handleSuggestionClickTow = (ip) => {
+    if (!inputTowRef.current) return;
 
+    const parts = inputTowRef.current.value.trim().split(/\s+/);
+    parts.pop();
+    parts.push(ip);
+    const newValue = parts.join(' ') + ' ';
+
+    inputTowRef.current.value = newValue;
+    inputTowRef.current.setSelectionRange(newValue.length, newValue.length);
+    inputTowRef.current.focus();
+
+    setIps(newValue);
+    setSuggestions([]);
+    
+  };
   // تفريغ جميع الحقول والنتائج
   const handleClear = () => {
     setIps('');
@@ -304,6 +320,7 @@ export default function SearchIps() {
                     key={idx}
                     style={{ cursor: 'pointer' }}
                     onClick={() => handleSuggestionClick(entry.ip)}
+
                     className="list-group-item d-flex justify-content-between align-items-center"
                   >
                     <span>{entry.name}</span>
@@ -321,31 +338,25 @@ export default function SearchIps() {
               type="text"
               placeholder="ابحث عن IP أو اسم لتغيير 🔴 إلى 🟢"
               value={searchTerm}
-              
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={handleInputChange}
+              ref={inputTowRef}
+
             />
-            {searchSuggestions.length > 0 && (
+             {suggestions.length > 0 && (
               <ul
                 className="list-group position-absolute w-100 z-3"
                 style={{ top: '100%', left: 0 }}
               >
-                {searchSuggestions.map((s, idx) => (
+                {suggestions.map((entry, idx) => (
                   <li
-  key={idx}
-  style={{ cursor: 'pointer' }}
-  className="list-group-item"
-  onClick={() => {
-  const parts = searchTerm.trim().split(/\s+/);
-  if (parts.length > 0) parts.pop(); // حذف الكلمة الأخيرة
-  parts.push(s); // إضافة الاسم المحدد
-  const updated = parts.join(' ') + ' ';
-  setSearchTerm(updated); // تحديث خانة البحث
-  setSearchSuggestions([]); // إخفاء الاقتراحات
-  inputRef.current?.focus();  
-}}
->
-  {s}
-</li>
+                    key={idx}
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => handleSuggestionClickTow(entry.ip)}
+                    className="list-group-item d-flex justify-content-between align-items-center"
+                  >
+                    <span>{entry.name}</span>
+                    <span className="text-muted small">{entry.ip}</span>
+                  </li>
                 ))}
               </ul>
             )}
