@@ -28,10 +28,7 @@ export default function SearchIps() {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchSuggestions, setSearchSuggestions] = useState([]);
 
-  // لإدارة تمييز العناصر في القائمتين
-  const [highlightIndex, setHighlightIndex] = useState(-1);
-  const [highlightSearchIndex, setHighlightSearchIndex] = useState(-1);
-
+  
   const containerRef = useRef();
   const inputRef = useRef();
 
@@ -76,7 +73,7 @@ export default function SearchIps() {
         entry.ip?.startsWith(lastWord)
     );
     setSuggestions(matches.slice(0, 10));
-    setHighlightIndex(-1);
+    
   };
 
   const handleInputChange = (e) => {
@@ -99,7 +96,7 @@ export default function SearchIps() {
 
     setIps(newValue);
     setSuggestions([]);
-    setHighlightIndex(-1);
+    
   };
 
   // تفريغ جميع الحقول والنتائج
@@ -256,7 +253,7 @@ export default function SearchIps() {
 
     const suggestions = matches.map((entry) => entry.name).slice(0, 10);
     setSearchSuggestions(suggestions);
-    setHighlightSearchIndex(-1);
+    
   }, [searchTerm, allData]);
 
   return (
