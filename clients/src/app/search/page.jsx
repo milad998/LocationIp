@@ -321,7 +321,7 @@ export default function SearchIps() {
               type="text"
               placeholder="ابحث عن IP أو اسم لتغيير 🔴 إلى 🟢"
               value={searchTerm}
-              ref={inputTowRef}
+              
               onChange={(e) => setSearchTerm(e.target.value)}
             />
             {searchSuggestions.length > 0 && (
