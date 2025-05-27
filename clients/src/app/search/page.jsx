@@ -336,14 +336,29 @@ export default function SearchIps() {
                     style={{ cursor: 'pointer' }}
                     className="list-group-item"
                     onClick={() => {
-  const parts = searchTerm.trim().split(/\s+/);
+  const input = inputTowRef.current;
+  if (!input) return;
+
+  const cursorPos = input.selectionStart || searchTerm.length;
+  const beforeCursor = searchTerm.slice(0, cursorPos);
+  const afterCursor = searchTerm.slice(cursorPos);
+
+  const parts = beforeCursor.trim().split(/\s+/);
   if (parts.length > 0) parts.pop(); // حذف الكلمة الأخيرة
-  parts.push(s); // إضافة الاسم المحدد
-  const updated = parts.join(' ') + ' ';
-  setSearchTerm(updated); // تحديث خانة البحث
-  setSearchSuggestions([]); // إخفاء الاقتراحات
-  inputTowRef.current?.focus();
-                    }}
+
+  const newValue = [...parts, s].join(' ') + ' ';
+  const finalValue = newValue + afterCursor.trimStart();
+  
+  setSearchTerm(finalValue);
+  setSearchSuggestions([]);
+
+  // وضع المؤشر بعد الكلمة الجديدة
+  setTimeout(() => {
+    const pos = newValue.length;
+    input.setSelectionRange(pos, pos);
+    input.focus();
+  }, 0);
+}}
                   >
                     {s}
                   </li>
