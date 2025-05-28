@@ -15,7 +15,7 @@ export default function AddLocationPage() {
     setLoading(true);
 
     try {
-      const response = await fetch('/api/add-location-tabaqa', {
+      const response = await fetch('http://localhost:8000/api/location/add-tabaqa', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ip, name }),
