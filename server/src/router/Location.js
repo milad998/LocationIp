@@ -10,6 +10,6 @@ router.post('/locations/search/ips', controller.findIpsInTables);
 router.get("/all",controller.fetchDevices);
 router.delete("/ip/:name",controller.deleteDevice);
 router.post("/location/add-tabaqa",controller.addLocationTabaqa);
-router.delete("location/tabaqa2",controller.deleteDeviceTabaqa);
+router.delete("location/tabaqa2/:name",controller.deleteDeviceTabaqa);
 router.get("location/",controller.findIpsInTablesTabaqa);
 module.exports = router;
