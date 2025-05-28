@@ -28,15 +28,15 @@ export default function TabaqaPage() {
 
       if (text.includes('IP')) {
         const lines = text.trim().split('\n').filter(line => line.includes('IP:'));
+        
         const formatted = lines.map((line) => {
           const nameMatch = line.match(/الاسم:\s*(.+?)\s*\|?/);
           const name = nameMatch ? nameMatch[1] : 'بدون اسم';
-          return `🔴 الاسم: ${name} (${label})`;
+          return `🔴 ${name} (${label})`;
         });
         setResults(formatted);
-      } else {
-        setResults([`🔴 لا توجد نتائج (${label})`]);
-      }
+      } 
+      
     } catch {
       setResults([`❌ فشل الاتصال بالخادم (${label})`]);
     }
@@ -111,6 +111,7 @@ export default function TabaqaPage() {
           ) : (
             <>
               <p className="bg-light p-2 rounded border mt-2 text-center text-dark">
+                وضع الشبكة:
                 {[...senderResults, ...receiverResults].join(' ')}
               </p>
               <div className="d-grid mt-3">
