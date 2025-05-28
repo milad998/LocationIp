@@ -14,7 +14,7 @@ export default function DeleteDevicePage() {
     setLoading(true);
 
     try {
-      const response = await fetch(`/api/delete-device-tabaqa/${name}`, {
+      const response = await fetch(`http://localhost:8000/api/location/tabaqa2/${name}`, {
         method: 'DELETE',
       });
 
