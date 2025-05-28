@@ -110,10 +110,14 @@ export default function TabaqaPage() {
             <p className="text-muted">لا توجد نتائج بعد</p>
           ) : (
             <>
-              <p className="bg-light p-2 rounded border mt-2 text-center text-dark">
-                وضع الشبكة:
-                {[...senderResults, ...receiverResults].join(' ')}
-              </p>
+              <div className="bg-light p-3 rounded border mt-2 text-dark">
+  <strong>وضع الشبكة:</strong>
+  <ul className="mt-2">
+    {[...senderResults, ...receiverResults].map((line, index) => (
+      <li key={index}>{line}</li>
+    ))}
+  </ul>
+</div>
               <div className="d-grid mt-3">
                 <button
                   onClick={handleCopyAndWhatsApp}
