@@ -3,10 +3,11 @@
 import { useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.rtl.min.css';
 
-export default function IpCheckPage() {
+export default function TabaqaPage() {
   const [senderIps, setSenderIps] = useState('');
   const [receiverIps, setReceiverIps] = useState('');
-  const [results, setResults] = useState([]);
+  const [senderResults, setSenderResults] = useState([]);
+  const [receiverResults, setReceiverResults] = useState([]);
 
   const parseIps = (input) => {
     return input
@@ -15,7 +16,7 @@ export default function IpCheckPage() {
       .filter(ip => ip);
   };
 
-  const fetchIpStatus = async (ips, label) => {
+  const fetchResults = async (ips, label, setResults) => {
     try {
       const response = await fetch('http://localhost:8000/api/location', {
         method: 'POST',
@@ -27,33 +28,34 @@ export default function IpCheckPage() {
 
       if (text.includes('IP')) {
         const lines = text.trim().split('\n').filter(line => line.includes('IP:'));
-        lines.forEach((line) => {
+        const formatted = lines.map((line) => {
           const nameMatch = line.match(/الاسم:\s*(.+?)\s*\|?/);
           const name = nameMatch ? nameMatch[1] : 'بدون اسم';
-
-          setResults(prev => [...prev, `🔴 الاسم: ${name} (${label})`]);
+          return `🔴 الاسم: ${name} (${label})`;
         });
+        setResults(formatted);
       } else {
-        setResults(prev => [...prev, `🔴 لا توجد نتائج (${label})`]);
+        setResults([`🔴 لا توجد نتائج (${label})`]);
       }
     } catch {
-      setResults(prev => [...prev, `❌ فشل الاتصال بالخادم (${label})`]);
+      setResults([`❌ فشل الاتصال بالخادم (${label})`]);
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setResults([]);
+    setSenderResults([]);
+    setReceiverResults([]);
 
     const senderList = parseIps(senderIps);
     const receiverList = parseIps(receiverIps);
 
-    if (senderList.length > 0) await fetchIpStatus(senderList, 'مرسل');
-    if (receiverList.length > 0) await fetchIpStatus(receiverList, 'مستقبل');
+    if (senderList.length > 0) await fetchResults(senderList, 'مرسل', setSenderResults);
+    if (receiverList.length > 0) await fetchResults(receiverList, 'مستقبل', setReceiverResults);
   };
 
   const handleCopyAndWhatsApp = () => {
-    const text = results.join('\n');
+    const text = [...senderResults, ...receiverResults].join(' ');
     navigator.clipboard.writeText(text);
     const encoded = encodeURIComponent(text);
     window.open(`https://wa.me/?text=${encoded}`, '_blank');
@@ -62,13 +64,14 @@ export default function IpCheckPage() {
   const handleReset = () => {
     setSenderIps('');
     setReceiverIps('');
-    setResults([]);
+    setSenderResults([]);
+    setReceiverResults([]);
   };
 
   return (
     <div className="container min-vh-100 d-flex flex-column justify-content-center align-items-center bg-light" dir="rtl">
-      <div className="card p-4 shadow-lg w-100" style={{ maxWidth: '700px' }}>
-        <h3 className="text-center mb-4 text-primary">البحث عن عناوين IP في طبقة</h3>
+      <div className="card p-4 shadow-lg w-100" style={{ maxWidth: '750px' }}>
+        <h3 className="text-center mb-4 text-primary">التحقق من عناوين IP في طبقة</h3>
 
         <form onSubmit={handleSubmit}>
           <div className="mb-3">
@@ -103,13 +106,13 @@ export default function IpCheckPage() {
 
         <div className="mt-4">
           <h5 className="text-secondary">النتائج:</h5>
-          {results.length === 0 ? (
+          {[...senderResults, ...receiverResults].length === 0 ? (
             <p className="text-muted">لا توجد نتائج بعد</p>
           ) : (
             <>
-              <pre className="bg-light p-2 rounded border mt-2 text-center text-dark">
-                {results.join('\n')}
-              </pre>
+              <p className="bg-light p-2 rounded border mt-2 text-center text-dark">
+                {[...senderResults, ...receiverResults].join(' ')}
+              </p>
               <div className="d-grid mt-3">
                 <button
                   onClick={handleCopyAndWhatsApp}
@@ -124,4 +127,4 @@ export default function IpCheckPage() {
       </div>
     </div>
   );
-        }
+                                                     }
