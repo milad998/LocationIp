@@ -10,7 +10,7 @@ export default function AddLocationPage() {
   const [modalMessage, setModalMessage] = useState('');
   const [showModal, setShowModal] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
