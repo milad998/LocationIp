@@ -8,13 +8,13 @@ export default function AddLocationPage() {
   const [status, setStatus] = useState('');
   const [error, setError] = useState('');
 
-  const isValidIPv4 = (ip: string) => {
+  const isValidIPv4 = (ip) => {
     const regex =
       /^(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)){3}$/;
     return regex.test(ip);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setStatus('');
