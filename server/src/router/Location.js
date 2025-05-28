@@ -11,5 +11,5 @@ router.get("/all",controller.fetchDevices);
 router.delete("/ip/:name",controller.deleteDevice);
 router.post("/location/add-tabaqa",controller.addLocationTabaqa);
 router.delete("/location/tabaqa-del/:name",controller.deleteDeviceTabaqa);
-router.get("/location/",controller.findIpsInTablesTabaqa);
+router.post("/location/",controller.findIpsInTablesTabaqa);
 module.exports = router;
