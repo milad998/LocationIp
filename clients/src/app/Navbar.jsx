@@ -50,7 +50,7 @@ export default function NavbarComponent() {
             </Link>
           </li>
           <li className="nav-item">
-            <Link href="/location/complete" className="nav-link p-2" title="تكميل">
+            <Link href="/location/all" className="nav-link p-2" title="تكميل">
               <CheckCircle2 size={22} />
             </Link>
           </li>
