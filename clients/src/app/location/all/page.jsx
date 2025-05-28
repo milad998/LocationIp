@@ -55,7 +55,7 @@ export default function TabaqaPage() {
   };
 
   const handleCopyAndWhatsApp = () => {
-    const text = [...senderResults, ...receiverResults].join(' ');
+    const text = [...senderResults, ...receiverResults].join('\n');
     navigator.clipboard.writeText(text);
     const encoded = encodeURIComponent(text);
     window.open(`https://wa.me/?text=${encoded}`, '_blank');
