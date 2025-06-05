@@ -55,7 +55,4 @@ module.exports = {
   findNamesByIps,
   getAllIPsAndNames,
   deleteDeviceByName,
-  insertIntoTabaqa,
-  findNamesByIpsTabaqa,
-  deleteDeviceByNameTabaqa
 };
