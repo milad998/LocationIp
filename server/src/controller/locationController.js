@@ -91,64 +91,12 @@ const deleteDevice = async (req, res) => {
   }
 };
 
-const addLocationTabaqa = async (req, res) => {
-  
-  const { ip, name } = req.body;
 
-  try {
-    const newEntry = await model.insertIntoTabaqa(ip, name);
-    res.status(201).json(newEntry);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
-const deleteDeviceTabaqa = async (req, res) => {
-  try {
-    const { name } = req.params;
-    if (!name) {
-      return res.status(400).json({ message: 'الاسم مطلوب' });
-    }
 
-    await model.deleteDeviceByNameTabaqa(name);
-    res.json({ message: `تم حذف الجهاز بالاسم: ${name}` });
-  } catch (err) {
-    console.error('Error deleting device:', err);
-    res.status(500).json({ message: 'خطأ في الخادم' });
-  }
-};
-const findIpsInTablesTabaqa = async (req, res) => {
-  const { ips } = req.body;
 
-  if (!Array.isArray(ips) || ips.length === 0) {
-    return res.status(400).json({ error: 'ips يجب أن تكون مصفوفة غير فارغة' });
-  }
-
-  let result = '';
-
-  try {
-    const matches = await model.findNamesByIpsTabaqa(ips);
-
-    if (matches.length > 0) {
-      result += "وضع المسار:\n";
-      for (const row of matches) {
-        const statusText = row.status ? 'مرسل' : 'مستقبل';
-        result += `IP: ${row.ip} | الاسم: ${row.name} | الحالة: ${statusText}\n`;
-      }
-    }
-
-    res.send(result || 'لم يتم العثور على أي IP.');
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
-    
-      
 module.exports = {
   addLocation,
   findIpsInTables,
   fetchDevices,
-  deleteDevice,
-  addLocationTabaqa,
-  deleteDeviceTabaqa,
-  findIpsInTablesTabaqa
+  deleteDevice
 };
